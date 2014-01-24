@@ -113,6 +113,9 @@ function run() {
     {
       benchmark: 'binarytrees',
       args: ['binarytrees.lua'],
+      createWorker: function() {
+        return new Worker('lua/benchmark-worker.js')
+      },
       calculate: function() {
         return this.msg.runtime/1000;
       },
@@ -123,6 +126,9 @@ function run() {
     {
       benchmark: 'scimark',
       args: ['scimark.lua'],
+      createWorker: function() {
+        return new Worker('lua/benchmark-worker.js')
+      },
       calculate: function() {
         return /\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]; 
       },
@@ -133,6 +139,9 @@ function run() {
     { // do startup last so there is no network access, and can see previous
       benchmark: 'startup',
       args: null,
+      createWorker: function() {
+        return new Worker('lua/benchmark-worker.js')
+      },
       calculate: function() {
         var startups = jobs.map(function(job) { return job.msg.startup });
         startups.sort(function(x, y) { return x - y });
@@ -161,8 +170,8 @@ function run() {
       return;
     }
     document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
-      document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
-    var worker = new Worker('benchmark-worker.js');
+    document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
+    var worker = job.createWorker();
     worker.onmessage = function(event) {
       var msg = event.data;
       console.log(JSON.stringify(msg));
