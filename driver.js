@@ -1,5 +1,18 @@
 var jobs = [
   {
+    benchmark: 'box2d',
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js')
+    },
+    calculate: function() {
+      console.log(this.msg.output);
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return (20.308/this.calculate());
+    },
+  },
+  {
     benchmark: 'lua-binarytrees',
     args: ['binarytrees.lua'],
     createWorker: function() {
