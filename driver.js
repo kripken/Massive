@@ -1,6 +1,6 @@
 var jobs = [
   {
-    benchmark: 'binarytrees',
+    benchmark: 'lua-binarytrees',
     args: ['binarytrees.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -13,7 +13,7 @@ var jobs = [
     },
   },
   {
-    benchmark: 'scimark',
+    benchmark: 'lua-scimark',
     args: ['scimark.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -26,7 +26,7 @@ var jobs = [
     },
   },
   { // do startup last so there is no network access, and can see previous
-    benchmark: 'startup',
+    benchmark: 'lua-startup',
     args: null,
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')

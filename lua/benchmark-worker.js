@@ -33,7 +33,7 @@ onmessage = function(event) {
     doIt('');
   } else {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', msg.benchmark + '.lua', true);
+    xhr.open('GET', msg.args[0], true);
     xhr.onload = function() {
       if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
         doIt(xhr.response);
