@@ -1,3 +1,47 @@
+var jobs = [
+  {
+    benchmark: 'binarytrees',
+    args: ['binarytrees.lua'],
+    createWorker: function() {
+      return new Worker('lua/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return (20.308/this.calculate());
+    },
+  },
+  {
+    benchmark: 'scimark',
+    args: ['scimark.lua'],
+    createWorker: function() {
+      return new Worker('lua/benchmark-worker.js')
+    },
+    calculate: function() {
+      return /\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]; 
+    },
+    normalized: function() {
+      return (this.calculate()/3.19);
+    },
+  },
+  { // do startup last so there is no network access, and can see previous
+    benchmark: 'startup',
+    args: null,
+    createWorker: function() {
+      return new Worker('lua/benchmark-worker.js')
+    },
+    calculate: function() {
+      var startups = jobs.map(function(job) { return job.msg.startup });
+      startups.sort(function(x, y) { return x - y });
+      return startups[Math.floor((startups.length-1)/2)]/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  }
+];
+
 var ran = false;
 function run() {
   if (ran) return;
@@ -7,50 +51,6 @@ function run() {
   theButton.innerHTML = 'Running benchmarks... (this can take a while)';
   theButton.classList.remove('btn-primary');
   theButton.classList.add('btn-warning');
-
-  var jobs = [
-    {
-      benchmark: 'binarytrees',
-      args: ['binarytrees.lua'],
-      createWorker: function() {
-        return new Worker('lua/benchmark-worker.js')
-      },
-      calculate: function() {
-        return this.msg.runtime/1000;
-      },
-      normalized: function() {
-        return (20.308/this.calculate());
-      },
-    },
-    {
-      benchmark: 'scimark',
-      args: ['scimark.lua'],
-      createWorker: function() {
-        return new Worker('lua/benchmark-worker.js')
-      },
-      calculate: function() {
-        return /\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]; 
-      },
-      normalized: function() {
-        return (this.calculate()/3.19);
-      },
-    },
-    { // do startup last so there is no network access, and can see previous
-      benchmark: 'startup',
-      args: null,
-      createWorker: function() {
-        return new Worker('lua/benchmark-worker.js')
-      },
-      calculate: function() {
-        var startups = jobs.map(function(job) { return job.msg.startup });
-        startups.sort(function(x, y) { return x - y });
-        return startups[Math.floor((startups.length-1)/2)]/1000;
-      },
-      normalized: function() {
-        return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
-      },
-    }
-  ];
 
   function finalCalculation() {
     // normalize based on experimental data
