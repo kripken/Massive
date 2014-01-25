@@ -1,6 +1,7 @@
 var jobInfo = {};
 
 var jobs = [
+  // box2d. build instructions: let emscripten benchmark suite generate it for you
   {
     benchmark: 'box2d-throughput',
     description: 'Box2D physics: average frame rate',
@@ -60,6 +61,7 @@ var jobs = [
     },
   },
 
+  // lua. build instructions: use lua.vm.js project build system
   {
     benchmark: 'lua-binarytrees',
     description: 'GC performance in compiled Lua VM',
