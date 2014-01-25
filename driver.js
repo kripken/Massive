@@ -3,6 +3,7 @@ var jobInfo = {};
 var jobs = [
   {
     benchmark: 'box2d-throughput',
+    args: ['3'],
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
     },
@@ -39,6 +40,20 @@ var jobs = [
       return (20.308/this.calculate());
     },
   },
+  {
+    benchmark: 'box2d-warm-startup',
+    args: ['0'],
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60);
+    },
+  },
+
   {
     benchmark: 'lua-binarytrees',
     args: ['binarytrees.lua'],
