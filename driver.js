@@ -3,6 +3,8 @@ var jobInfo = {};
 var jobs = [
   {
     benchmark: 'box2d-throughput',
+    description: 'Box2D physics: average frame rate',
+    scale: 'milliseconds (lower numbers are better)',
     args: ['3'],
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
@@ -24,6 +26,8 @@ var jobs = [
   },
   {
     benchmark: 'box2d-latency',
+    description: 'Box2D physics: frame variability and worst case',
+    scale: 'milliseconds (lower numbers are better)',
     createWorker: function() {
       return {
         postMessage: function() {
@@ -41,7 +45,9 @@ var jobs = [
     },
   },
   {
-    benchmark: 'box2d-warm-startup',
+    benchmark: 'box2d-startup',
+    description: 'how long it takes Box2D to be ready to run, after it was previously run',
+    scale: 'seconds (lower numbers are better)',
     args: ['0'],
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
@@ -56,6 +62,8 @@ var jobs = [
 
   {
     benchmark: 'lua-binarytrees',
+    description: 'GC performance in compiled Lua VM',
+    scale: 'seconds (lower numbers are better)',
     args: ['binarytrees.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -69,6 +77,8 @@ var jobs = [
   },
   {
     benchmark: 'lua-scimark',
+    description: 'numeric computation performance in compiled Lua VM',
+    scale: 'MFLOPS (higher numbers are better)',
     args: ['scimark.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -82,6 +92,8 @@ var jobs = [
   },
   { // do startup last so there is no network access, and can see previous
     benchmark: 'lua-startup',
+    description: 'how long it takes the compiled Lua VM to be ready to run, after it was previously run',
+    scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -102,6 +114,11 @@ function run() {
   if (ran) return;
   ran = true;
 
+  document.getElementById('results_area').hidden = false;
+
+  var tableBody = document.getElementById('table_body');
+  tableBody.innerHTML = '';
+
   var theButton = document.getElementById('the_button');
   theButton.innerHTML = 'Running benchmarks... (this can take a while)';
   theButton.classList.remove('btn-primary');
@@ -116,6 +133,7 @@ function run() {
 
   var curr = 0;
   function runJob() {
+
     var job = jobs[curr++];
     if (!job) {
       theButton.innerHTML = 'Score: <strong>' + finalCalculation() + '</strong> (higher numbers are better)';
@@ -123,6 +141,14 @@ function run() {
       theButton.classList.add('btn-success');
       return;
     }
+
+    tableBody.innerHTML += '<tr>' +
+                           '  <td>' + job.benchmark + '-throughput</td>' +
+                           '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
+                           '  <td>' + job.scale + '</td>' +
+                           '  <td>' + job.description + '</td>' +
+                           '</tr>';
+
     document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
     document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
     var worker = job.createWorker();
