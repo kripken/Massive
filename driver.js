@@ -46,10 +46,25 @@ var jobs = [
     },
   },
   {
-    benchmark: 'box2d-startup',
+    benchmark: 'box2d-warm-startup',
     description: 'how long a warm startup takes for Box2D',
     scale: 'seconds (lower numbers are better)',
     args: ['0'],
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60);
+    },
+  },
+  {
+    benchmark: 'box2d-cold-startup',
+    description: 'how long a cold startup takes for Box2D',
+    scale: 'seconds (lower numbers are better)',
+    args: 'cold',
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
     },
@@ -93,7 +108,7 @@ var jobs = [
     },
   },
   { // do startup last so there is no network access, and can see previous
-    benchmark: 'lua-startup',
+    benchmark: 'lua-warm-startup',
     description: 'how long a warm startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
