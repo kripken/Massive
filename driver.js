@@ -47,7 +47,7 @@ var jobs = [
   },
   {
     benchmark: 'box2d-startup',
-    description: 'how long it takes Box2D to be ready to run, after it was previously run',
+    description: 'how long a warm startup takes for Box2D',
     scale: 'seconds (lower numbers are better)',
     args: ['0'],
     createWorker: function() {
@@ -94,7 +94,7 @@ var jobs = [
   },
   { // do startup last so there is no network access, and can see previous
     benchmark: 'lua-startup',
-    description: 'how long it takes the compiled Lua VM to be ready to run, after it was previously run',
+    description: 'how long a warm startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
