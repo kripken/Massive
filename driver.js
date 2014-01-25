@@ -1,3 +1,5 @@
+var jobInfo = {};
+
 var jobs = [
   {
     benchmark: 'box2d',
@@ -5,11 +7,18 @@ var jobs = [
       return new Worker('box2d/benchmark-worker.js')
     },
     calculate: function() {
-      console.log(this.msg.output);
-      return this.msg.runtime/1000;
+      // output format is:         frame averages: 31.675 +- 7.808, range: 22.000 to 63.000
+      var m = /frame averages: (\d+\.\d+) \+- (\d+\.\d+), range: (\d+\.\d+) to (\d+\.\d+)/.exec(this.msg.output);
+      jobInfo.box2D = {
+        average: m[1],
+        variance: m[2],
+        lowest: m[3],
+        highest: m[4]
+      };
+      return jobInfo.box2D.average;
     },
     normalized: function() {
-      return (20.308/this.calculate());
+      return (20308/this.calculate());
     },
   },
   {
