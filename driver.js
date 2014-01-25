@@ -2,7 +2,7 @@ var jobInfo = {};
 
 var jobs = [
   {
-    benchmark: 'box2d',
+    benchmark: 'box2d-throughput',
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
     },
@@ -10,15 +10,33 @@ var jobs = [
       // output format is:         frame averages: 31.675 +- 7.808, range: 22.000 to 63.000
       var m = /frame averages: (\d+\.\d+) \+- (\d+\.\d+), range: (\d+\.\d+) to (\d+\.\d+)/.exec(this.msg.output);
       jobInfo.box2D = {
-        average: m[1],
-        variance: m[2],
-        lowest: m[3],
-        highest: m[4]
+        average: parseFloat(m[1]),
+        variance: parseFloat(m[2]),
+        lowest: parseFloat(m[3]),
+        highest: parseFloat(m[4])
       };
       return jobInfo.box2D.average;
     },
     normalized: function() {
-      return (20308/this.calculate());
+      return (20.308/this.calculate());
+    },
+  },
+  {
+    benchmark: 'box2d-latency',
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          this.onmessage({ data: {
+            benchmark: 'box2d-latency'
+          }});
+        }
+      };
+    },
+    calculate: function() {
+      return (2*jobInfo.box2D.variance + (jobInfo.box2D.highest - jobInfo.box2D.average))/3;
+    },
+    normalized: function() {
+      return (20.308/this.calculate());
     },
   },
   {
@@ -41,7 +59,7 @@ var jobs = [
       return new Worker('lua/benchmark-worker.js')
     },
     calculate: function() {
-      return /\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]; 
+      return parseFloat(/\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]);
     },
     normalized: function() {
       return (this.calculate()/3.19);
@@ -98,7 +116,7 @@ function run() {
       console.log(JSON.stringify(msg));
       if (msg.benchmark != job.benchmark) throw 'invalid data from benchmark worker';
       job.msg = msg;
-      document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate() + '</b>';
+      document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
       runJob();
     };
