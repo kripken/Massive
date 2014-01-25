@@ -147,10 +147,12 @@ function run() {
                            '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
                            '  <td>' + job.scale + '</td>' +
                            '  <td>' + job.description + '</td>' +
+                           '  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
                            '</tr>';
 
     document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
     document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
+
     var worker = job.createWorker();
     worker.onmessage = function(event) {
       var msg = event.data;
@@ -159,6 +161,8 @@ function run() {
       job.msg = msg;
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
+      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + (100*job.normalized()).toFixed(3) + '</b>';
+      document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       runJob();
     };
     console.log('requesting benchmark ' + job.benchmark);
