@@ -143,7 +143,7 @@ function run() {
     }
 
     tableBody.innerHTML += '<tr>' +
-                           '  <td>' + job.benchmark + '-throughput</td>' +
+                           '  <td>' + job.benchmark + '</td>' +
                            '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
                            '  <td>' + job.scale + '</td>' +
                            '  <td>' + job.description + '</td>' +
