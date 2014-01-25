@@ -1,4 +1,4 @@
-var jobInfo = {};
+var jobMap = {};
 
 var jobs = [
   // box2d. build instructions: let emscripten benchmark suite generate it for you
@@ -13,13 +13,13 @@ var jobs = [
     calculate: function() {
       // output format is:         frame averages: 31.675 +- 7.808, range: 22.000 to 63.000
       var m = /frame averages: (\d+\.\d+) \+- (\d+\.\d+), range: (\d+\.\d+) to (\d+\.\d+)/.exec(this.msg.output);
-      jobInfo.box2D = {
+      this.parsed = {
         average: parseFloat(m[1]),
         variance: parseFloat(m[2]),
         lowest: parseFloat(m[3]),
         highest: parseFloat(m[4])
       };
-      return jobInfo.box2D.average;
+      return this.parsed.average;
     },
     normalized: function() {
       return (20.308/this.calculate());
@@ -39,7 +39,8 @@ var jobs = [
       };
     },
     calculate: function() {
-      return (2*jobInfo.box2D.variance + (jobInfo.box2D.highest - jobInfo.box2D.average))/3;
+      var parsed = jobMap['box2d-throughput'].parsed;
+      return (2*parsed.variance + (parsed.highest - parsed.average))/3;
     },
     normalized: function() {
       return (20.308/this.calculate());
@@ -116,9 +117,7 @@ var jobs = [
       return new Worker('lua/benchmark-worker.js')
     },
     calculate: function() {
-      var startups = jobs.map(function(job) { return job.msg.startup });
-      startups.sort(function(x, y) { return x - y });
-      return startups[Math.floor((startups.length-1)/2)]/1000;
+      return this.msg.startup/1000;
     },
     normalized: function() {
       return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
@@ -158,6 +157,7 @@ function run() {
       theButton.classList.add('btn-success');
       return;
     }
+    jobMap[job.benchmark] = job;
 
     tableBody.innerHTML += '<tr>' +
                            '  <td>' + job.benchmark + '</td>' +
