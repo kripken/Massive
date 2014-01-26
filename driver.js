@@ -1,7 +1,7 @@
 var jobMap = {};
 
 var jobs = [
-  // test of latency/smoothness on main thread as a large codebase loads
+  /*// test of latency/smoothness on main thread as a large codebase loads
   {
     benchmark: 'main-thread-responsiveness',
     description: 'Maximum pause on the main thread as a large codebase is loaded asynchronously',
@@ -17,7 +17,7 @@ var jobs = [
           frame.height = document.body.clientHeight*0.2;
           frame.src = 'responsiveness.html'
           window.onmessage = function(event) {
-            document.getElementById('presentation-area').removeChild(frame);
+            //document.getElementById('presentation-area').removeChild(frame);
             window.onmessage = null;
             worker.onmessage({ data: {
               benchmark: 'main-thread-responsiveness',
@@ -32,12 +32,14 @@ var jobs = [
       };
     },
     calculate: function() {
-      return this.msg.msg.latency;
+      alert(JSON.stringify(this.msg));
+      throw 1;
+      return this.msg.msg.worst;
     },
     normalized: function() {
       return 20.308/this.calculate();
     },
-  },
+  },*/
 
   // box2d. build instructions: let emscripten benchmark suite generate it for you
   {

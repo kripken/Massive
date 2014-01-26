@@ -128,10 +128,23 @@
       Module.setStatus('Downloading...');
     </script>
     <script>
+      var lastTime = 0, worst = 0, total = 0;
+      function timer() {
+        var now = Date.now();
+        if (lastTime) {
+          var curr = now - lastTime;
+          worst = Math.max(worst, curr);
+          total += curr;
+        }
+        lastTime = now;
+        requestAnimationFrame(timer);
+      }
+      requestAnimationFrame(timer);
+
       window.onmessage = function(event) {
         Module.arguments = ['0', '0'];
-        Module.preRun.push(function() {
-          event.source.postMessage({ latency: 1234 }, event.origin);
+        Module.postRun.push(function() {
+          event.source.postMessage({ worst: worst, total: total }, event.origin);
           throw 'abort run';
         });
 
@@ -141,7 +154,7 @@
 
         // First, get the source and modify it
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'box2d/box2d.js', false);//'sqlite/sqlite.js', false);
+        xhr.open('GET', 'box2d/box2d.js', false);
         xhr.send(null);
         var src = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
         if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
