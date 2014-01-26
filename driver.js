@@ -1,11 +1,12 @@
 var jobMap = {};
 
 var jobs = [
-  /*// test of latency/smoothness on main thread as a large codebase loads
+  // test of latency/smoothness on main thread as a large codebase loads
+  // build instructions: see box2d
   {
     benchmark: 'main-thread-responsiveness',
-    description: 'Maximum pause on the main thread as a large codebase is loaded asynchronously',
-    scale: 'milliseconds (lower numbers are better)',
+    description: 'Pauses on the main thread as Box2D is loaded and run (from cold startup)',
+    scale: 'seconds (lower numbers are better)',
     args: ['3'],
     createWorker: function() {
       return {
@@ -17,7 +18,7 @@ var jobs = [
           frame.height = document.body.clientHeight*0.2;
           frame.src = 'responsiveness.html'
           window.onmessage = function(event) {
-            //document.getElementById('presentation-area').removeChild(frame);
+            document.getElementById('presentation-area').removeChild(frame);
             window.onmessage = null;
             worker.onmessage({ data: {
               benchmark: 'main-thread-responsiveness',
@@ -32,14 +33,13 @@ var jobs = [
       };
     },
     calculate: function() {
-      alert(JSON.stringify(this.msg));
-      throw 1;
-      return this.msg.msg.worst;
+      // should we also bump the importance of the worst frame?
+      return this.msg.msg.total/1000;
     },
     normalized: function() {
-      return 20.308/this.calculate();
+      return 3/this.calculate();
     },
-  },*/
+  },
 
   // box2d. build instructions: let emscripten benchmark suite generate it for you
   {

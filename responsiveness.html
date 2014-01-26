@@ -20,12 +20,12 @@
         -moz-animation: rotation .8s linear infinite;
         -o-animation: rotation .8s linear infinite;
         animation: rotation 0.8s linear infinite;
-        border-left: 10px solid rgb(0,150,240);
-        border-right: 10px solid rgb(0,150,240);
-        border-bottom: 10px solid rgb(0,150,240);
-        border-top: 10px solid rgb(100,0,200);
+        border-left: 10px solid rgb(0,50,200);
+        border-right: 10px solid rgb(0,50,200);
+        border-bottom: 10px solid rgb(0,50,200);
+        border-top: 10px solid rgb(200,50,25);
         border-radius: 100%;
-        background-color: rgb(200,100,250);
+        background-color: rgb(200,200,250);
       }
       @-webkit-keyframes rotation {
         from {-webkit-transform: rotate(0deg);}
@@ -47,16 +47,14 @@
     </style>
   </head>
   <body>
-    <hr/>
     <figure style="overflow:visible;" id="spinner"><div class="spinner"></div><center style="margin-top:0.5em"></center></figure>
-    <div class="emscripten" id="status">Compiling code...</div>
+    <div class="emscripten" id="status"></div>
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>  
     </div>
     <div class="emscripten_border">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
     </div>
-    <hr/>
     <div class="emscripten">
       <input type="checkbox" id="resize">Resize canvas
       <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
@@ -65,7 +63,6 @@
                                                                                 document.getElementById('resize').checked)">
     </div>
     
-    <hr/>
     <textarea class="emscripten" id="output" rows="8"></textarea>
     <hr>
     <script type='text/javascript'>
@@ -115,9 +112,8 @@
             progressElement.value = null;
             progressElement.max = null;
             progressElement.hidden = true;
-            if (!text) spinnerElement.hidden = true;
           }
-          statusElement.innerHTML = text;
+          statusElement.innerHTML = '';//text;
         },
         totalDependencies: 0,
         monitorRunDependencies: function(left) {
@@ -129,43 +125,63 @@
     </script>
     <script>
       var lastTime = 0, worst = 0, total = 0;
-      function timer() {
-        var now = Date.now();
-        if (lastTime) {
-          var curr = now - lastTime;
-          worst = Math.max(worst, curr);
-          total += curr;
+      var parentWindow;
+
+      window.onmessage = function(event) { parentWindow = event.source;
+        Module.arguments = ['2', '1'];
+        var oldPrint = Module.print;
+        var printBuffer = '';
+        Module.print = function(x) {
+          printBuffer += x;
+          oldPrint(x);
+          // see when the run is over
+          if (x.indexOf('frame averages') >= 0) {
+            spinnerElement.hidden = true;
+            clearInterval(interval);
+            if (cleanup) cleanup();
+            var output = { worst: worst, total: total };//, text: printBuffer }
+            //alert(JSON.stringify(output));
+            parentWindow.postMessage(output, event.origin);
+          }
+        };
+
+        var cold = true;
+        var url = 'box2d/box2d.js';
+
+        if (cold) {
+          // Load a large asm.js file asynchronously. We could just use a <script async> here, but then code caching
+          // might lead to immediate startup, without us getting a chance to check responsiveness during actual
+          // compilation. So we modify some text and use a blob url, to ensure it is something not in the cache.
+
+          // First, get the source and modify it
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', url, false);
+          xhr.send(null);
+          var code = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
+          if (code === xhr.responseText) throw 'failed to modify code' + typeof xhr.responseText;
+          var blob = new Blob([code]);
+          var src = URL.createObjectURL(blob);
+          var cleanup = function() {
+            URL.revokeObjectURL(script.src);
+          };
+        } else {
+          // warm, XXX assumes previous runs
+          src = url;
         }
-        lastTime = now;
-        requestAnimationFrame(timer);
-      }
-      requestAnimationFrame(timer);
-
-      window.onmessage = function(event) {
-        Module.arguments = ['0', '0'];
-        Module.postRun.push(function() {
-          event.source.postMessage({ worst: worst, total: total }, event.origin);
-          throw 'abort run';
-        });
-
-        // Load a large asm.js file asynchronously. We could just use a <script async> here, but then code caching
-        // might lead to immediate startup, without us getting a chance to check responsiveness during actual
-        // compilation. So we modify some text and use a blob url, to ensure it is something not in the cache.
-
-        // First, get the source and modify it
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'box2d/box2d.js', false);
-        xhr.send(null);
-        var src = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
-        if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
-
-        // Now, create an object url, and start the load
-        var blob = new Blob([src]);
         var script = document.createElement('script');
-        script.onload = function() {
-          URL.revokeObjectURL(script.src);
-        }
-        script.src = URL.createObjectURL(blob);
+        script.src = src;
+
+        var interval = setInterval(function() {
+          var now = Date.now();
+          if (lastTime) {
+            var curr = Math.max(0, now - lastTime - 1000/30); // measure positive deviations from 1/30 frame rates, minimal that looks ok
+            //Module.print([Math.round(now - lastTime), Math.round(curr)]);
+            worst = Math.max(worst, curr);
+            total += curr;
+          }
+          lastTime = now;
+        }, 1000/60);
+
         document.body.appendChild(script);
       };
     </script>
