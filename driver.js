@@ -1,6 +1,44 @@
 var jobMap = {};
 
 var jobs = [
+  // test of latency/smoothness on main thread as a large codebase loads
+  {
+    benchmark: 'main-thread-responsiveness',
+    description: 'Maximum pause on the main thread as a large codebase is loaded asynchronously',
+    scale: 'milliseconds (lower numbers are better)',
+    args: ['3'],
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          var worker = this;
+          // create the iframe and set up communication
+          var frame = document.createElement('iframe');
+          frame.width = document.body.clientWidth*0.9;
+          frame.height = document.body.clientHeight*0.2;
+          frame.src = 'responsiveness.html'
+          window.onmessage = function(event) {
+            document.getElementById('presentation-area').removeChild(frame);
+            window.onmessage = null;
+            worker.onmessage({ data: {
+              benchmark: 'main-thread-responsiveness',
+              msg: event.data
+            }});
+          };
+          frame.onload = function() {
+            frame.contentWindow.postMessage('go!', '*');
+          };
+          document.getElementById('presentation-area').appendChild(frame);
+        }
+      };
+    },
+    calculate: function() {
+      return this.msg.msg.latency;
+    },
+    normalized: function() {
+      return 20.308/this.calculate();
+    },
+  },
+
   // box2d. build instructions: let emscripten benchmark suite generate it for you
   {
     benchmark: 'box2d-throughput',
