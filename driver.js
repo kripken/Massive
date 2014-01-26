@@ -206,6 +206,7 @@ function run() {
   ran = true;
 
   document.getElementById('results_area').hidden = false;
+  document.getElementById('warning').hidden = true;
 
   var tableBody = document.getElementById('table_body');
   tableBody.innerHTML = '';
