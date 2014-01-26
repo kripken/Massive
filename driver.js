@@ -134,10 +134,13 @@ var jobs = [
       return new Worker('sqlite/benchmark-worker.js')
     },
     calculate: function() {
-      return this.msg.runtime/1000;
+      var m = /create table : took (\d+) ms\n25,000 inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = 25000\n\ncount\(\*\) = 5000\n\ncount\(\*\) = 15000\n\ncount\(\*\) = 5000\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = 5000\n\ncount\(\*\) = 15000\n\nselects with indexes : took (\d+) ms/.exec(this.msg.output);
+      if (!m) throw 'invalid sqlite output: ' + this.msg.output;
+      m = m.map(parseFloat);
+      return (m[1]+m[2]+m[3]+m[4]+m[5]+m[6])/1000;
     },
     normalized: function() {
-      return 20.308/Math.max(this.calculate(), 1/60);
+      return 4.0/Math.max(this.calculate(), 1/60);
     },
   },
 ];
