@@ -108,7 +108,7 @@ var jobs = [
       return (this.calculate()/3.19);
     },
   },
-  { // do startup last so there is no network access, and can see previous
+  { // do startup last so there is no network access
     benchmark: 'lua-warm-startup',
     description: 'how long a warm startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
@@ -122,7 +122,24 @@ var jobs = [
     normalized: function() {
       return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
     },
-  }
+  },
+
+  // sqlite. build instructions: run asm3.test_sqlite in emscripten test suite
+  {
+    benchmark: 'sqlite',
+    description: 'sqlite operations performance (create, inserts, selects)',
+    scale: 'seconds (lower numbers are better)',
+    args: ['5000', '9'],
+    createWorker: function() {
+      return new Worker('sqlite/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 20.308/Math.max(this.calculate(), 1/60);
+    },
+  },
 ];
 
 var ran = false;
