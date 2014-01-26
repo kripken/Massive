@@ -162,9 +162,8 @@ function run() {
 
   function finalCalculation() {
     // normalize based on experimental data
-    var normalized = jobs.map(function(job) { return 100*job.normalized() });
-    console.log('normalized values: ' + normalized);
-    return Math.round(normalized.reduce(function(x, y) { return x + y }, 0));
+    var normalized = jobs.map(function(job) { return job.normalized() });
+    return Math.round(100 * normalized.reduce(function(x, y) { return x + y }, 0));
   }
 
   var curr = 0;
