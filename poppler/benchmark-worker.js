@@ -27,7 +27,7 @@ onmessage = function(event) {
 
   // prepare code, add data, and run
   var start = Date.now();
-  var pagesLeft = 125;
+  var pagesLeft = 215;
   Module.print = function(x) {
     Module.printBuffer += x + '\n';
     if (--pagesLeft === 0) {

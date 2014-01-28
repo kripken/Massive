@@ -35,10 +35,10 @@ var jobs = [
     },
     calculate: function() {
       // should we also bump the importance of the worst frame?
-      return this.msg.msg.total/1000;
+      return Math.max(1/30, this.msg.msg.total/1000);
     },
     normalized: function() {
-      return 3/this.calculate();
+      return 0.3/this.calculate();
     },
   },
 
@@ -63,7 +63,7 @@ var jobs = [
       return this.parsed.average;
     },
     normalized: function() {
-      return (20.308/this.calculate());
+      return (10/this.calculate());
     },
   },
   {
@@ -85,7 +85,7 @@ var jobs = [
       return (2*parsed.variance + (parsed.highest - parsed.average))/3;
     },
     normalized: function() {
-      return (20.308/this.calculate());
+      return (1/this.calculate());
     },
   },
   {
@@ -129,10 +129,10 @@ var jobs = [
       return new Worker('lua/benchmark-worker.js')
     },
     calculate: function() {
-      return this.msg.runtime/1000;
+      return Math.max(1/30, this.msg.runtime/1000);
     },
     normalized: function() {
-      return (20.308/this.calculate());
+      return (7/this.calculate());
     },
   },
   {
@@ -147,7 +147,7 @@ var jobs = [
       return parseFloat(/\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]);
     },
     normalized: function() {
-      return (this.calculate()/3.19);
+      return this.calculate()/10;
     },
   },
   { // do startup last so there is no network access
@@ -191,10 +191,10 @@ var jobs = [
       return new Worker('poppler/benchmark-worker.js')
     },
     calculate: function() {
-      return this.msg.runtime/1000;
+      return Math.max(1/30, this.msg.runtime/1000);
     },
     normalized: function() {
-      return (20/this.calculate());
+      return (7/this.calculate());
     },
   },
 
@@ -203,18 +203,18 @@ var jobs = [
     benchmark: 'sqlite',
     description: 'sqlite operations performance (create, inserts, selects)',
     scale: 'seconds (lower numbers are better)',
-    args: ['5000', '9'],
+    args: ['20000', '25'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
     },
     calculate: function() {
-      var m = /create table : took (\d+) ms\n25,000 inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = 25000\n\ncount\(\*\) = 5000\n\ncount\(\*\) = 15000\n\ncount\(\*\) = 5000\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = 5000\n\ncount\(\*\) = 15000\n\nselects with indexes : took (\d+) ms/.exec(this.msg.output);
+      var m = /create table : took (\d+) ms\n\d+,\d+ inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects with indexes : took (\d+) ms/.exec(this.msg.output);
       if (!m) throw 'invalid sqlite output: ' + this.msg.output;
       m = m.map(parseFloat);
       return (m[1]+m[2]+m[3]+m[4]+m[5]+m[6])/1000;
     },
     normalized: function() {
-      return 4.0/Math.max(this.calculate(), 1/60);
+      return 8.0/Math.max(this.calculate(), 1/60);
     },
   },
 ];
