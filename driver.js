@@ -29,7 +29,8 @@ var jobs = [
             frame.contentWindow.postMessage('go!', '*');
           };
           document.getElementById('presentation-area').appendChild(frame);
-        }
+        },
+        terminate: function(){},
       };
     },
     calculate: function() {
@@ -75,7 +76,8 @@ var jobs = [
           this.onmessage({ data: {
             benchmark: 'box2d-latency'
           }});
-        }
+        },
+        terminate: function(){},
       };
     },
     calculate: function() {
@@ -272,7 +274,10 @@ function run() {
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
       document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + (100*job.normalized()).toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
-      runJob();
+      setTimeout(function() {
+        worker.terminate(); // ensure the worker is cleaned up before the next starts
+        runJob();
+      }, 1);
     };
     console.log('requesting benchmark ' + job.benchmark);
     worker.postMessage({
