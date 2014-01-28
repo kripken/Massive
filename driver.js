@@ -1,23 +1,6 @@
 var jobMap = {};
 
 var jobs = [
-  // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
-  {
-    benchmark: 'poppler',
-    description: 'Poppler PDF performance: cold startup + rendering',
-    scale: 'seconds (lower numbers are better)',
-    args: [],
-    createWorker: function() {
-      return new Worker('poppler/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.runtime/1000;
-    },
-    normalized: function() {
-      return (20/this.calculate());
-    },
-  },
-
   // test of latency/smoothness on main thread as a large codebase loads
   // build instructions: see box2d
   {
@@ -193,6 +176,23 @@ var jobs = [
     },
     normalized: function() {
       return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+
+  // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
+  {
+    benchmark: 'poppler',
+    description: 'Poppler PDF performance: cold startup + rendering',
+    scale: 'seconds (lower numbers are better)',
+    args: [],
+    createWorker: function() {
+      return new Worker('poppler/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return (20/this.calculate());
     },
   },
 
