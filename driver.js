@@ -1,13 +1,8 @@
-var jobMap = {};
-
-var jobs = [
-  // test of latency/smoothness on main thread as a large codebase loads
-  // build instructions: see box2d
-  {
-    benchmark: 'main-thread-responsiveness',
-    description: 'Pauses on the main thread as Box2D is loaded and run (from cold startup)',
+function makeMainThreadBenchmark(name, args) {
+  return {
+    benchmark: 'main-thread-' + name,
+    description: 'Pauses on the main thread as XXX is loaded and run (from ? startup)',
     scale: 'seconds (lower numbers are better)',
-    args: ['3'],
     createWorker: function() {
       return {
         postMessage: function() {
@@ -21,12 +16,12 @@ var jobs = [
             document.getElementById('presentation-area').removeChild(frame);
             window.onmessage = null;
             worker.onmessage({ data: {
-              benchmark: 'main-thread-responsiveness',
+              benchmark: 'main-thread-' + name,
               msg: event.data
             }});
           };
           frame.onload = function() {
-            frame.contentWindow.postMessage('go!', '*');
+            frame.contentWindow.postMessage(args, '*');
           };
           document.getElementById('presentation-area').appendChild(frame);
         },
@@ -35,12 +30,21 @@ var jobs = [
     },
     calculate: function() {
       // should we also bump the importance of the worst frame?
-      return Math.max(1/30, this.msg.msg.total/1000);
+      return Math.max(1/30, this.msg.msg.mainThread/1000);
     },
     normalized: function() {
       return 0.3/this.calculate();
     },
-  },
+  };
+}
+
+var jobMap = {};
+
+var jobs = [
+  // test of latency/smoothness on main thread as a large codebase loads
+  // build instructions: see below
+  makeMainThreadBenchmark('poppler-cold', { cold: true }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false }),
 
   // box2d. build instructions: let emscripten benchmark suite generate it for you
   {

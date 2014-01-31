@@ -124,29 +124,50 @@
       Module.setStatus('Downloading...');
     </script>
     <script>
-      var lastTime = 0, worst = 0, total = 0;
-      var parentWindow;
+      var lastTime = 0, total = 0;
 
-      window.onmessage = function(event) { parentWindow = event.source;
-        Module.arguments = ['2', '1'];
+      function noticeFrame() {
+        var now = Date.now();
+        if (lastTime) {
+          var curr = Math.max(0, now - lastTime - 1000/30); // measure positive deviations from 1/30 frame rates, minimal that looks ok
+          //Module.printErr([Math.round(now - lastTime), Math.round(curr)]);
+          total += curr;
+        }
+        lastTime = now;
+      }
+
+      window.onmessage = function(event) {
+        var params = event.data;
+        var parentWindow = event.source;
+
+        Module.arguments = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5']
+
+        var cold = event.cold;
+        var url = 'poppler/poppler.js';
+        var data = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
+        var prints = 5;
+
+        var interval;
+        var startTime = -Infinity;
+
         var oldPrint = Module.print;
         var printBuffer = '';
         Module.print = function(x) {
-          printBuffer += x;
+          printBuffer += x + ' | ';
           oldPrint(x);
           // see when the run is over
-          if (x.indexOf('frame averages') >= 0) {
+          if (--prints === 0) {
+            noticeFrame(); // see the last frame before we quit
             spinnerElement.hidden = true;
             clearInterval(interval);
+            Module.print = function(){};
             if (cleanup) cleanup();
-            var output = { worst: worst, total: total };//, text: printBuffer }
+            var output = { benchmark: event.benchmark, mainThread: total, walltime: Date.now() - startTime, text: printBuffer }
             //alert(JSON.stringify(output));
             parentWindow.postMessage(output, event.origin);
+            if (Module.pauseMainLoop) Module.pauseMainLoop();
           }
         };
-
-        var cold = true;
-        var url = 'box2d/box2d.js';
 
         if (cold) {
           // Load a large asm.js file asynchronously. We could just use a <script async> here, but then code caching
@@ -169,20 +190,34 @@
           src = url;
         }
         var script = document.createElement('script');
-        script.src = src;
 
-        var interval = setInterval(function() {
-          var now = Date.now();
-          if (lastTime) {
-            var curr = Math.max(0, now - lastTime - 1000/30); // measure positive deviations from 1/30 frame rates, minimal that looks ok
-            //Module.print([Math.round(now - lastTime), Math.round(curr)]);
-            worst = Math.max(worst, curr);
-            total += curr;
-          }
-          lastTime = now;
-        }, 1000/60);
+        function runBenchmark() {
+          startTime = Date.now();
+          script.src = src;
+          interval = setInterval(noticeFrame, 1000/60);
+          document.body.appendChild(script);
+        }
 
-        document.body.appendChild(script);
+        if (data) {
+          // fetch data
+          xhr = new XMLHttpRequest();
+          xhr.open('GET', data.url, true);
+          xhr.responseType = 'arraybuffer';
+          xhr.onload = function () {
+            if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
+              var response = new Uint8Array(xhr.response);
+              Module.preRun = [function() {
+                FS.createDataFile('/', data.filename, response, true, false);
+              }];
+              runBenchmark();
+            } else {
+              alert('not good');
+            }
+          };
+          xhr.send(null);
+        } else {
+          runBenchmark();
+        }
       };
     </script>
   </body>
