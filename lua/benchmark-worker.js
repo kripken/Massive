@@ -21,10 +21,12 @@ onmessage = function(event) {
   function doIt(code) {
     var start = Date.now();
     Lua.execute(code);
+    var scimark = /\nSciMark +([\d\.]+)/.exec(Module.printBuffer) || [];
     postMessage({
       benchmark: msg.benchmark,
       startup: startup,
       runtime: Date.now() - start,
+      scimarkTime: parseFloat(scimark[1]),
       output: Module.printBuffer
     });
   }

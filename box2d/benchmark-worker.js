@@ -9,6 +9,20 @@ if (typeof console === 'undefined') console = { log: function(){} };
 onmessage = function(event) {
   var msg = event.data;
 
+  function respond(output) {
+    // output format is:         frame averages: 31.675 +- 7.808, range: 22.000 to 63.000
+    var m = /frame averages: (\d+\.\d+) \+- (\d+\.\d+), range: (\d+\.\d+) to (\d+\.\d+)/.exec(output);
+    m = m || []; // for just startup
+    postMessage({
+      benchmark: msg.benchmark,
+      runtime: time,
+      average: parseFloat(m[1]),
+      variance: parseFloat(m[2]),
+      lowest: parseFloat(m[3]),
+      highest: parseFloat(m[4])
+    });
+  }
+
   if (msg.args === 'cold') {
     Module.arguments = ['0'];
     var xhr = new XMLHttpRequest();
@@ -19,11 +33,7 @@ onmessage = function(event) {
     var start = Date.now();
     var out = eval(src);
     var time = Date.now() - start;
-    postMessage({
-      benchmark: msg.benchmark,
-      runtime: time,
-      output: Module.printBuffer + '|' + out
-    });
+    respond(Module.printBuffer + '|' + out);
     return;
   }
 
@@ -33,10 +43,6 @@ onmessage = function(event) {
   importScripts('box2d.js');
   var time = Date.now() - start;
 
-  postMessage({
-    benchmark: msg.benchmark,
-    runtime: time,
-    output: Module.printBuffer
-  });
+  respond(Module.printBuffer);
 };
 

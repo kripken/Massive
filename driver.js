@@ -15,10 +15,8 @@ function makeMainThreadBenchmark(name, args) {
           window.onmessage = function(event) {
             document.getElementById('presentation-area').removeChild(frame);
             window.onmessage = null;
-            worker.onmessage({ data: {
-              benchmark: 'main-thread-' + name,
-              msg: event.data
-            }});
+            event.data.benchmark = 'main-thread-' + name;
+            worker.onmessage(event);
           };
           frame.onload = function() {
             frame.contentWindow.postMessage(args, '*');
@@ -30,7 +28,7 @@ function makeMainThreadBenchmark(name, args) {
     },
     calculate: function() {
       // should we also bump the importance of the worst frame?
-      return Math.max(1/30, this.msg.msg.mainThread/1000);
+      return Math.max(1/30, this.msg.mainThread/1000);
     },
     normalized: function() {
       return 0.3/this.calculate();
@@ -56,15 +54,7 @@ var jobs = [
       return new Worker('box2d/benchmark-worker.js')
     },
     calculate: function() {
-      // output format is:         frame averages: 31.675 +- 7.808, range: 22.000 to 63.000
-      var m = /frame averages: (\d+\.\d+) \+- (\d+\.\d+), range: (\d+\.\d+) to (\d+\.\d+)/.exec(this.msg.output);
-      this.parsed = {
-        average: parseFloat(m[1]),
-        variance: parseFloat(m[2]),
-        lowest: parseFloat(m[3]),
-        highest: parseFloat(m[4])
-      };
-      return this.parsed.average;
+      return this.msg.average;
     },
     normalized: function() {
       return (10/this.calculate());
@@ -85,7 +75,7 @@ var jobs = [
       };
     },
     calculate: function() {
-      var parsed = jobMap['box2d-throughput'].parsed;
+      var parsed = jobMap['box2d-throughput'].msg;
       return (2*parsed.variance + (parsed.highest - parsed.average))/3;
     },
     normalized: function() {
@@ -148,7 +138,7 @@ var jobs = [
       return new Worker('lua/benchmark-worker.js')
     },
     calculate: function() {
-      return parseFloat(/\nSciMark +([\d\.]+)/.exec(this.msg.output)[1]);
+      return this.msg.scimarkTime;
     },
     normalized: function() {
       return this.calculate()/10;
@@ -212,10 +202,7 @@ var jobs = [
       return new Worker('sqlite/benchmark-worker.js')
     },
     calculate: function() {
-      var m = /create table : took (\d+) ms\n\d+,\d+ inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects with indexes : took (\d+) ms/.exec(this.msg.output);
-      if (!m) throw 'invalid sqlite output: ' + this.msg.output;
-      m = m.map(parseFloat);
-      return (m[1]+m[2]+m[3]+m[4]+m[5]+m[6])/1000;
+      return this.msg.calcTime;
     },
     normalized: function() {
       return 8.0/Math.max(this.calculate(), 1/60);
@@ -246,6 +233,7 @@ function run() {
   }
 
   var curr = 0;
+
   function runJob() {
 
     var job = jobs[curr++];
@@ -268,26 +256,64 @@ function run() {
     document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
     document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
 
-    var worker = job.createWorker();
-    worker.onmessage = function(event) {
-      var msg = event.data;
-      console.log(JSON.stringify(msg));
-      if (msg.benchmark != job.benchmark) throw 'invalid data from benchmark worker';
-      job.msg = msg;
+    // Run the job the specified number of times
+    var reps = 0;
+    var totalReps = job.reps || 1;
+    var warmupReps = job.warmups || 0;
+    var results = [];
+
+    function finish() {
+      console.log('final: ' + JSON.stringify(results));
+      var final = {};
+      for (var i = warmupReps; i < totalReps; i++) {
+        var result = results[i];
+        for (var k in result) {
+          if (typeof result[k] === 'number') {
+            final[k] = (final[k] || 0) + result[k];
+          }
+        }
+      }
+      for (var k in final) {
+        if (typeof final[k] === 'number') {
+          final[k] /= totalReps - warmupReps;
+        }
+      }
+      job.msg = final;
+      console.log('final: ' + JSON.stringify(job.msg));
+
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
       document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + (100*job.normalized()).toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
-        worker.terminate(); // ensure the worker is cleaned up before the next starts
         runJob();
       }, 1);
-    };
-    console.log('requesting benchmark ' + job.benchmark);
-    worker.postMessage({
-      benchmark: job.benchmark,
-      args: job.args
-    });
+    }
+
+    function doRep() {
+      var worker = job.createWorker();
+      worker.onmessage = function(event) {
+        var msg = event.data;
+        console.log(JSON.stringify(msg));
+        if (msg.benchmark != job.benchmark) throw 'invalid data from benchmark worker';
+        results.push(msg);
+
+        reps++;
+        if (reps === totalReps) {
+          worker.terminate(); // ensure the worker is cleaned up before the next starts
+          finish();
+        } else {
+          setTimeout(doRep, 1);
+        }
+      };
+      console.log('requesting benchmark ' + job.benchmark);
+      worker.postMessage({
+        benchmark: job.benchmark,
+        args: job.args
+      });
+    }
+
+    doRep();
   }
   runJob();
 }
