@@ -142,7 +142,7 @@
 
         Module.arguments = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5']
 
-        var cold = event.cold;
+        var cold = params.cold;
         var url = 'poppler/poppler.js';
         var data = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
         var prints = 5;
@@ -178,7 +178,7 @@
           var xhr = new XMLHttpRequest();
           xhr.open('GET', url, false);
           xhr.send(null);
-          var code = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
+          var code = xhr.responseText.replace('"use asm";', '"use asm";' + 'var RANDOM_DOGE=' + Math.random() + ';'); // randomize to avoid caching
           if (code === xhr.responseText) throw 'failed to modify code' + typeof xhr.responseText;
           var blob = new Blob([code]);
           var src = URL.createObjectURL(blob);

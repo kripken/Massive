@@ -3,6 +3,8 @@ function makeMainThreadBenchmark(name, args) {
     benchmark: 'main-thread-' + name,
     description: 'Pauses on the main thread as XXX is loaded and run (from ? startup)',
     scale: 'seconds (lower numbers are better)',
+    totalReps: args.cold ? 1 : 2,
+    warmupReps: args.cold ? 0 : 1,
     createWorker: function() {
       return {
         postMessage: function() {
@@ -27,11 +29,11 @@ function makeMainThreadBenchmark(name, args) {
       };
     },
     calculate: function() {
-      // should we also bump the importance of the worst frame?
-      return Math.max(1/30, this.msg.mainThread/1000);
+      // care about both main thread pauses, and total time spent
+      return Math.max(1/30, (this.msg.mainThread + this.msg.walltime)/1000);
     },
     normalized: function() {
-      return 0.3/this.calculate();
+      return (args.cold ? 2.5 : 1)/this.calculate();
     },
   };
 }
@@ -258,8 +260,8 @@ function run() {
 
     // Run the job the specified number of times
     var reps = 0;
-    var totalReps = job.reps || 1;
-    var warmupReps = job.warmups || 0;
+    var totalReps = job.totalReps || 1;
+    var warmupReps = job.warmupReps || 0;
     var results = [];
 
     function finish() {
@@ -279,7 +281,7 @@ function run() {
         }
       }
       job.msg = final;
-      console.log('final: ' + JSON.stringify(job.msg));
+      console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
