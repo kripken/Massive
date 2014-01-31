@@ -46,7 +46,7 @@ var jobs = [
   makeMainThreadBenchmark('poppler-cold', { cold: true }),
   makeMainThreadBenchmark('poppler-warm', { cold: false }),
 
-  // box2d. build instructions: let emscripten benchmark suite generate it for you
+  // box2d. build instructions: let emscripten benchmark suite generate it for you (non-fround)
   {
     benchmark: 'box2d-throughput',
     description: 'Box2D physics: average frame rate',
