@@ -1,7 +1,7 @@
 function makeMainThreadBenchmark(name, args) {
   return {
     benchmark: 'main-thread-' + name,
-    description: 'Pauses on the main thread as XXX is loaded and run (from ? startup)',
+    description: 'Responsiveness and throughput on the main thread as ' + name + ' is loaded and starts to run (' + (args.cold ? 'cold' : 'warm') + ' startup)',
     scale: 'seconds (lower numbers are better)',
     totalReps: args.cold ? 1 : 2,
     warmupReps: args.cold ? 0 : 1,
@@ -41,7 +41,7 @@ function makeMainThreadBenchmark(name, args) {
 var jobMap = {};
 
 var jobs = [
-  // test of latency/smoothness on main thread as a large codebase loads
+  // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructions: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true }),
   makeMainThreadBenchmark('poppler-warm', { cold: false }),
@@ -84,21 +84,7 @@ var jobs = [
       return (1/this.calculate());
     },
   },
-  {
-    benchmark: 'box2d-warm-startup',
-    description: 'how long a warm startup takes for Box2D',
-    scale: 'seconds (lower numbers are better)',
-    args: ['0'],
-    createWorker: function() {
-      return new Worker('box2d/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.runtime/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60);
-    },
-  },
+/*
   {
     benchmark: 'box2d-cold-startup',
     description: 'how long a cold startup takes for Box2D',
@@ -114,6 +100,22 @@ var jobs = [
       return 0.10/Math.max(this.calculate(), 1/60);
     },
   },
+  {
+    benchmark: 'box2d-warm-startup',
+    description: 'how long a warm startup takes for Box2D',
+    scale: 'seconds (lower numbers are better)',
+    args: ['0'],
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60);
+    },
+  },
+*/
 
   // lua. build instructions: use lua.vm.js project build system
   {
@@ -147,12 +149,12 @@ var jobs = [
     },
   },
   { // do startup last so there is no network access
-    benchmark: 'lua-warm-startup',
-    description: 'how long a warm startup takes the compiled Lua VM',
+    benchmark: 'lua-cold-startup',
+    description: 'how long a cold startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
-      return new Worker('lua/benchmark-worker.js')
+      return new Worker('lua/benchmark-worker-cold-startup.js')
     },
     calculate: function() {
       return this.msg.startup/1000;
@@ -162,12 +164,12 @@ var jobs = [
     },
   },
   { // do startup last so there is no network access
-    benchmark: 'lua-cold-startup',
-    description: 'how long a cold startup takes the compiled Lua VM',
+    benchmark: 'lua-warm-startup',
+    description: 'how long a warm startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
-      return new Worker('lua/benchmark-worker-cold-startup.js')
+      return new Worker('lua/benchmark-worker.js')
     },
     calculate: function() {
       return this.msg.startup/1000;
