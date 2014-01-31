@@ -163,11 +163,13 @@ var jobs = [
       return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
     },
   },
-  { // do startup last so there is no network access
+  {
     benchmark: 'lua-warm-startup',
     description: 'how long a warm startup takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
+    totalReps: 2,
+    warmupReps: 1,
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
     },
