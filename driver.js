@@ -41,10 +41,14 @@ function makeMainThreadBenchmark(name, args) {
 var jobMap = {};
 
 var jobs = [
+  { title: 'Main thread responsiveness' },
+
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructions: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true }),
   makeMainThreadBenchmark('poppler-warm', { cold: false }),
+
+  { title: 'Throughput' },
 
   // box2d. build instructions: let emscripten benchmark suite generate it for you (non-fround)
   {
@@ -60,28 +64,6 @@ var jobs = [
     },
     normalized: function() {
       return (10/this.calculate());
-    },
-  },
-  {
-    benchmark: 'box2d-latency',
-    description: 'Box2D physics: frame variability and worst case',
-    scale: 'milliseconds (lower numbers are better)',
-    createWorker: function() {
-      return {
-        postMessage: function() {
-          this.onmessage({ data: {
-            benchmark: 'box2d-latency'
-          }});
-        },
-        terminate: function(){},
-      };
-    },
-    calculate: function() {
-      var parsed = jobMap['box2d-throughput'].msg;
-      return (2*parsed.variance + (parsed.highest - parsed.average))/3;
-    },
-    normalized: function() {
-      return (1/this.calculate());
     },
   },
 /*
@@ -148,39 +130,6 @@ var jobs = [
       return this.calculate()/10;
     },
   },
-  { // do startup last so there is no network access
-    benchmark: 'lua-cold-startup',
-    description: 'how long a cold startup takes the compiled Lua VM',
-    scale: 'seconds (lower numbers are better)',
-    args: null,
-    createWorker: function() {
-      return new Worker('lua/benchmark-worker-cold-startup.js')
-    },
-    calculate: function() {
-      return this.msg.startup/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
-    },
-  },
-  {
-    benchmark: 'lua-warm-startup',
-    description: 'how long a warm startup takes the compiled Lua VM',
-    scale: 'seconds (lower numbers are better)',
-    args: null,
-    totalReps: 2,
-    warmupReps: 1,
-    createWorker: function() {
-      return new Worker('lua/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.startup/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
-    },
-  },
-
   // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler',
@@ -214,6 +163,67 @@ var jobs = [
       return 8.0/Math.max(this.calculate(), 1/60);
     },
   },
+
+  { title: 'Startup' },
+
+  { // do startup last so there is no network access
+    benchmark: 'lua-cold-startup',
+    description: 'how long a cold startup takes the compiled Lua VM',
+    scale: 'seconds (lower numbers are better)',
+    args: null,
+    createWorker: function() {
+      return new Worker('lua/benchmark-worker-cold-startup.js')
+    },
+    calculate: function() {
+      return this.msg.startup/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'lua-warm-startup',
+    description: 'how long a warm startup takes the compiled Lua VM',
+    scale: 'seconds (lower numbers are better)',
+    args: null,
+    totalReps: 2,
+    warmupReps: 1,
+    createWorker: function() {
+      return new Worker('lua/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.startup/1000;
+    },
+    normalized: function() {
+      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+
+  { title: 'Latency' },
+
+  {
+    benchmark: 'box2d-latency',
+    description: 'Box2D physics: frame variability and worst case',
+    scale: 'milliseconds (lower numbers are better)',
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          this.onmessage({ data: {
+            benchmark: 'box2d-latency'
+          }});
+        },
+        terminate: function(){},
+      };
+    },
+    calculate: function() {
+      var parsed = jobMap['box2d-throughput'].msg;
+      return (2*parsed.variance + (parsed.highest - parsed.average))/3;
+    },
+    normalized: function() {
+      return (1/this.calculate());
+    },
+  },
+
 ];
 
 var ran = false;
@@ -249,6 +259,18 @@ function run() {
       theButton.classList.add('btn-success');
       return;
     }
+    if (job.title) {
+      tableBody.innerHTML += '<tr>' +
+                             '  <td style="background-color:#ddd">' + job.title + '</td>' +
+                             '  <td style="background-color:#ddd"></td>' +
+                             '  <td style="background-color:#ddd"></td>' +
+                             '  <td style="background-color:#ddd"></td>' +
+                             '  <td style="background-color:#ddd"></td>' +
+                             '</tr>';
+      setTimeout(runJob, 1);
+      return;
+    }
+
     jobMap[job.benchmark] = job;
 
     tableBody.innerHTML += '<tr>' +
