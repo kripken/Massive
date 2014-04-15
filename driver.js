@@ -1,7 +1,6 @@
 function makeMainThreadBenchmark(name, args) {
   return {
     benchmark: 'main-thread-' + name,
-    description: 'Responsiveness and throughput on the main thread as ' + name + ' is loaded and starts to run (' + (args.cold ? 'cold' : 'warm') + ' startup)',
     scale: 'seconds (lower numbers are better)',
     totalReps: args.cold ? 1 : 2,
     warmupReps: args.cold ? 0 : 1,
@@ -41,14 +40,14 @@ function makeMainThreadBenchmark(name, args) {
 var jobMap = {};
 
 var jobs = [
-  { title: 'Main thread responsiveness' },
+  { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructions: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true }),
   makeMainThreadBenchmark('poppler-warm', { cold: false }),
 
-  { title: 'Throughput' },
+  { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
   // box2d. build instructions: let emscripten benchmark suite generate it for you (non-fround)
   {
@@ -164,7 +163,7 @@ var jobs = [
     },
   },
 
-  { title: 'Startup' },
+  { title: 'Startup', description: 'Tests how fast a casebase is loaded and ready to run' },
 
   { // do startup last so there is no network access
     benchmark: 'lua-cold-startup',
@@ -199,11 +198,11 @@ var jobs = [
     },
   },
 
-  { title: 'Latency' },
+  { title: 'Latency', description: 'Runs many frames of a long-running simulation and tests variability and the worst case among them' },
 
   {
     benchmark: 'box2d-latency',
-    description: 'Box2D physics: frame variability and worst case',
+    description: 'Box2D physics',
     scale: 'milliseconds (lower numbers are better)',
     createWorker: function() {
       return {
@@ -261,10 +260,10 @@ function run() {
     }
     if (job.title) {
       tableBody.innerHTML += '<tr>' +
-                             '  <td style="background-color:#ddd">' + job.title + '</td>' +
+                             '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
                              '  <td style="background-color:#ddd"></td>' +
                              '  <td style="background-color:#ddd"></td>' +
-                             '  <td style="background-color:#ddd"></td>' +
+                             '  <td style="background-color:#ddd">' + (job.description || '') + '</td>' +
                              '  <td style="background-color:#ddd"></td>' +
                              '</tr>';
       setTimeout(runJob, 1);
@@ -277,7 +276,7 @@ function run() {
                            '  <td>' + job.benchmark + '</td>' +
                            '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
                            '  <td>' + job.scale + '</td>' +
-                           '  <td>' + job.description + '</td>' +
+                           '  <td>' + (job.description || '') + '</td>' +
                            '  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
                            '</tr>';
 
