@@ -3099,7 +3099,7 @@ function copyTempDouble(ptr) {
             }
           });
         }
-        if (stream.__proto__) {
+        if (0) {
           // reuse the object
           stream.__proto__ = FS.FSStream.prototype;
         } else {
