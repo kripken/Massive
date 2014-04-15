@@ -198,17 +198,17 @@ var jobs = [
     },
   },
 
-  { title: 'Latency', description: 'Runs many frames of a long-running simulation and tests variability and the worst case among them' },
+  { title: 'Variance', description: 'Runs many frames of a long-running simulation and tests variability and the worst case among them' },
 
   {
-    benchmark: 'box2d-latency',
+    benchmark: 'box2d-variance',
     description: 'Box2D physics',
     scale: 'milliseconds (lower numbers are better)',
     createWorker: function() {
       return {
         postMessage: function() {
           this.onmessage({ data: {
-            benchmark: 'box2d-latency'
+            benchmark: 'box2d-variance'
           }});
         },
         terminate: function(){},
