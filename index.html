@@ -84,6 +84,7 @@
              to benchmark Emscripten itself, and therefore mainly focused on throughput, and is runnable in both shell and
              browser. Massive, on the other hand, tests not just
              throughput but also browser responsiveness and other factors that only make sense when running in a browser.</p>
+          <a name="explanations"></a>
           <h4>What is the difference between "Main Thread Responsiveness", "Startup", and "Variance"?</h4>
           <p><b>Main thread responsiveness</b> measures the user experience as a large codebase is loaded. What is tested is whether
              the main thread stalls as the codebase is parsed and executed for a short while. The score here can be improved
@@ -93,7 +94,9 @@
              the main thread execute at the proper interval (as when the main thread stalls, it stalls both the user
              experience and other events).</p>
           <p><b>Startup</b> measures how long (in wall time) is spent to get a codebase ready to execute. This measures how much
-             time is lost if you add a script tag with that project to your web site, for example.</p>
+             time passes between adding a script tag with that code and being able to call the code (this may or may not
+             cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; main thread responsiveness
+             tests that aspect).</p>
           <p><b>Variance</b> measures how variable the frame rate is in an application that needs to run in each frame
              (this is important in things like games, which much finish all they need every 1/60 of a second, in order to be
              smooth). Specifically, we run many frames and then calculate the statistical variance and worst case. Note that

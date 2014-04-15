@@ -262,7 +262,7 @@ function run() {
                              '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
                              '  <td style="background-color:#ddd"></td>' +
                              '  <td style="background-color:#ddd"></td>' +
-                             '  <td style="background-color:#ddd">' + (job.description || '') + '</td>' +
+                             '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a href="#explanations">details</a>)' : '') + '</td>' +
                              '  <td style="background-color:#ddd"></td>' +
                              '</tr>';
       setTimeout(runJob, 1);
