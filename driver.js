@@ -163,11 +163,11 @@ var jobs = [
     },
   },
 
-  { title: 'Startup', description: 'Tests how fast a casebase is loaded and ready to run' },
+  { title: 'Parsing', description: 'Tests how fast a casebase is loaded and ready to run' },
 
   { // do startup last so there is no network access
-    benchmark: 'lua-cold-startup',
-    description: 'how long a cold startup takes the compiled Lua VM',
+    benchmark: 'lua-cold-parsing',
+    description: 'how long a cold parsing takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
@@ -181,8 +181,8 @@ var jobs = [
     },
   },
   {
-    benchmark: 'lua-warm-startup',
-    description: 'how long a warm startup takes the compiled Lua VM',
+    benchmark: 'lua-warm-parsing',
+    description: 'how long a warm parsing takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     totalReps: 2,
