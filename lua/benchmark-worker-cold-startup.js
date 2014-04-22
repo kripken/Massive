@@ -1,7 +1,9 @@
 
 var Module = {
-  print: function(x) { Module.printBuffer += x + '\n' },
-  printBuffer: ''
+  printBuffer: '',
+  print: function(x) {
+    Module.printBuffer += x + '\n';
+  }
 };
 
 if (typeof console === 'undefined') console = { log: function(){} };
