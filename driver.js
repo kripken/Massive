@@ -203,7 +203,7 @@ var jobs = [
 
   {
     benchmark: 'box2d-variance',
-    description: 'Box2D physics',
+    description: 'Box2D physics: frame rate variance',
     scale: 'milliseconds (lower numbers are better)',
     createWorker: function() {
       return {
