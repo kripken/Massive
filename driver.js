@@ -225,6 +225,10 @@ var jobs = [
   },
 ];
 
+function normalize(job) {
+  return Math.round(1000 * job.normalized());
+}
+
 var ran = false;
 function run() {
   if (ran) return;
@@ -243,8 +247,10 @@ function run() {
 
   function finalCalculation() {
     // normalize based on experimental data
-    var normalized = jobs.filter(function(job) { return job.normalized }).map(function(job) { return job.normalized() });
-    return Math.round(100 * normalized.reduce(function(x, y) { return x + y }, 0));
+    var normalized = jobs.filter(function(job) { return job.normalized }).map(function(job) { return normalize(job) });
+    return Math.round(
+      normalized.map(function(x) { return Math.pow(x, 1/normalized.length) }).reduce(function(x, y) { return x * y }, 1)
+    );
   }
 
   var curr = 0;
@@ -310,7 +316,7 @@ function run() {
 
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
-      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + (100*job.normalized()).toFixed(3) + '</b>';
+      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + normalize(job) + '</b>';
       document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
         runJob();
