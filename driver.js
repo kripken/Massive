@@ -133,7 +133,7 @@ var jobs = [
   // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler',
-    description: 'Poppler PDF performance: cold startup + rendering',
+    description: 'Poppler PDF performance: startup + rendering',
     scale: 'seconds (lower numbers are better)',
     args: [],
     createWorker: function() {
@@ -196,6 +196,38 @@ var jobs = [
     },
     normalized: function() {
       return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'poppler-cold-parsing',
+    description: 'how long a cold parsing takes Poppler',
+    scale: 'seconds (lower numbers are better)',
+    args: ['startup'],
+    createWorker: function() {
+      return new Worker('poppler/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.startup/1000;
+    },
+    normalized: function() {
+      return 0.40/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'poppler-warm-parsing',
+    description: 'how long a warm parsing takes Poppler',
+    scale: 'seconds (lower numbers are better)',
+    args: ['startup', 'warm'],
+    totalReps: 2,
+    warmupReps: 1,
+    createWorker: function() {
+      return new Worker('poppler/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.startup/1000;
+    },
+    normalized: function() {
+      return 0.13/Math.max(this.calculate(), 1/60); // resolution: 1 frame
     },
   },
 
