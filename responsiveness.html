@@ -14,7 +14,7 @@
     </style>
   </head>
   <body>
-    <textarea id="spinner" cols=10 maxlength=20 disabled=1></textarea>
+    <textarea id="spinner" cols=20 maxlength=20 disabled=1 value="X"></textarea>
     <div class="emscripten" id="status"></div>
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>  
@@ -101,7 +101,13 @@
           total += curr;
         }
         lastTime = now;
-        spinnerElement.value = counter++;
+        var spin = '';
+        for (var i = 0; i < Math.abs(counter); i++) {
+          spin += ' ';
+        }
+        spinnerElement.value = spin + 'X';
+        counter++;
+        if (counter === 18) counter *= -1;
       }
 
       window.onmessage = function(event) {
