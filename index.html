@@ -85,23 +85,21 @@
              browser. Massive, on the other hand, tests not just
              throughput but also browser responsiveness and other factors that only make sense when running in a browser.</p>
           <a name="explanations"></a>
-          <h4>What do the categories ("Main Thread Responsiveness", "Throughput", "Parsing", and "Variance") mean?</h4>
-          <p><b>Main thread responsiveness</b> measures the user experience as a large codebase is loaded. What is tested is whether
-             the main thread stalls as the codebase is parsed and executed for a short while. The score here can be improved
+          <h4>What do the categories ("Main Thread Responsiveness", "Throughput", "Preparation", and "Variance") mean?</h4>
+          <p><b>Main Thread Responsiveness</b> measures the user experience as a large codebase is loaded. What is tested is whether
+             the main thread stalls as the codebase is prepared and executed for a short while. The score here can be improved
              by parsing the code off the main thread, for example. This does <b>not</b> measure how much time is spent,
              but only how responsive or unresponsive the user experience is (how much time is spent is measured by
-             parsing, and to some extent throughput). Technically, we measure responsiveness by seeing if events on
+             Preparation, and to some extent Throughput). Technically, we measure responsiveness by seeing if events on
              the main thread execute at the proper interval (as when the main thread stalls, it stalls both the user
              experience and other events).</p>
           <p><b>Throughput</b> measures how fast a large computational workload runs. This is what is typically measured by
              benchmarks. Massive's throughput tests focus on very large real-world codebases.</p>
-          <p><b>Parsing</b> measures how long (in wall time) is spent to get a codebase ready to execute. This measures how much
+          <p><b>Preparation</b> measures how long (in wall time) is spent to get a codebase ready to execute. This measures how much
              time passes between adding a script tag with that code and being able to call the code (this may or may not
-             cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; main thread responsiveness
-             tests that aspect). Note that the term "parsing" is used because of the usual distinction between "parsing"
-             (everything that is done before actually running the code) and "running" (actually executing the code), but it is
-             possible a JS engine may not use this time to parse (it may defer parsing) or it may do other things (like start
-             to compile the code).</p>
+             cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; Main Thread Responsiveness
+             tests that aspect). "Parsing" is basically all the time before code is actually able to run; that may include
+             parsing, conversion to bitcode, JIT compilation, etc., depending in the JS engine.</p>
           <p><b>Variance</b> measures how variable the frame rate is in an application that needs to run in each frame
              (this is important in things like games, which much finish all they need every 1/60 of a second, in order to be
              smooth). Specifically, we run many frames and then calculate the statistical variance and worst case. Note that

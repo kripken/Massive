@@ -164,11 +164,11 @@ var jobs = [
     },
   },
 
-  { title: 'Parsing', description: 'Tests how fast a casebase is loaded and ready to run' },
+  { title: 'Preparation', description: 'Tests how fast a casebase is loaded and ready to run' },
 
   { // do startup last so there is no network access
-    benchmark: 'lua-cold-parsing',
-    description: 'how long a cold parsing takes the compiled Lua VM',
+    benchmark: 'lua-cold-preparation',
+    description: 'how long a cold preparation takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     createWorker: function() {
@@ -182,8 +182,8 @@ var jobs = [
     },
   },
   {
-    benchmark: 'lua-warm-parsing',
-    description: 'how long a warm parsing takes the compiled Lua VM',
+    benchmark: 'lua-warm-preparation',
+    description: 'how long a warm preparation takes the compiled Lua VM',
     scale: 'seconds (lower numbers are better)',
     args: null,
     totalReps: 2,
@@ -199,8 +199,8 @@ var jobs = [
     },
   },
   {
-    benchmark: 'poppler-cold-parsing',
-    description: 'how long a cold parsing takes Poppler',
+    benchmark: 'poppler-cold-preparation',
+    description: 'how long a cold preparation takes Poppler',
     scale: 'seconds (lower numbers are better)',
     args: ['startup'],
     createWorker: function() {
@@ -214,8 +214,8 @@ var jobs = [
     },
   },
   {
-    benchmark: 'poppler-warm-parsing',
-    description: 'how long a warm parsing takes Poppler',
+    benchmark: 'poppler-warm-preparation',
+    description: 'how long a warm preparation takes Poppler',
     scale: 'seconds (lower numbers are better)',
     args: ['startup', 'warm'],
     totalReps: 2,
