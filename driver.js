@@ -3,7 +3,7 @@ function makeMainThreadBenchmark(name, args) {
     benchmark: 'main-thread-' + name,
     description: 'Responsiveness during poppler PDF rendering on the main thread',
     scale: 'seconds (lower numbers are better)',
-    totalReps: args.cold ? 1 : 2,
+    totalReps: 3,
     warmupReps: args.cold ? 0 : 1,
     createWorker: function() {
       return {
