@@ -29,8 +29,8 @@ function makeMainThreadBenchmark(name, args) {
       };
     },
     calculate: function() {
-      // care about both main thread pauses, and total time spent
-      return Math.max(1/30, (this.msg.mainThread + this.msg.walltime/10)/1000);
+      // care about main thread pauses
+      return Math.max(1/30, this.msg.mainThread/1000);
     },
     normalized: function() {
       return (args.cold ? 2.5 : 1)/this.calculate();
