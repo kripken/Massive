@@ -66,6 +66,22 @@ var jobs = [
       return (10/this.calculate());
     },
   },
+  // box2d float32. build instructions: let emscripten benchmark suite generate it for you, with PRECISE_F32=2
+  {
+    benchmark: 'box2d-throughput-f32',
+    description: 'Box2D physics: average frame rate w/ Math.fround',
+    scale: 'milliseconds (lower numbers are better)',
+    args: ['3'],
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.average;
+    },
+    normalized: function() {
+      return (10/this.calculate());
+    },
+  },
 /*
   {
     benchmark: 'box2d-cold-startup',
