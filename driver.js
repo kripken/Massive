@@ -1,3 +1,15 @@
+
+function prettyNumber(x) {
+  x = '' + x;
+  var chars = x.split('');
+  var ret = '';
+  for (var i = 0; i < x.length; i++) {
+    if (i > 0 && i % 3 === 0) ret = ',' + ret;
+    ret = x[x.length-1-i] + ret;
+  }
+  return ret;
+}
+
 function makeMainThreadBenchmark(name, args) {
   return {
     benchmark: 'main-thread-' + name,
@@ -274,7 +286,7 @@ var jobs = [
 ];
 
 function normalize(job) {
-  return Math.round(1000 * job.normalized());
+  return Math.round(10000 * job.normalized());
 }
 
 var ran = false;
@@ -307,7 +319,7 @@ function run() {
 
     var job = jobs[curr++];
     if (!job) {
-      theButton.innerHTML = 'Score: <strong>' + finalCalculation() + '</strong> (higher numbers are better)';
+      theButton.innerHTML = 'Score: <strong>' + prettyNumber(finalCalculation()) + '</strong> (higher numbers are better)';
       theButton.classList.remove('btn-warning');
       theButton.classList.add('btn-success');
       return;
@@ -364,7 +376,7 @@ function run() {
 
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
-      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + normalize(job) + '</b>';
+      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyNumber(normalize(job)) + '</b>';
       document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
         runJob();
