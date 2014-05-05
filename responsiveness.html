@@ -24,19 +24,20 @@
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>  
     </div>
-    <div class="emscripten_border">
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <div style="display:none">
+      <div class="emscripten_border">
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
+      <div class="emscripten">
+        <input type="checkbox" id="resize">Resize canvas
+        <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
+        &nbsp;&nbsp;&nbsp;
+        <input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
+                                                                                  document.getElementById('resize').checked)">
+      </div>
+      <textarea class="emscripten" id="output" rows="8"></textarea>
+      <hr>
     </div>
-    <div class="emscripten">
-      <input type="checkbox" id="resize">Resize canvas
-      <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
-      &nbsp;&nbsp;&nbsp;
-      <input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
-                                                                                document.getElementById('resize').checked)">
-    </div>
-    
-    <textarea class="emscripten" id="output" rows="8"></textarea>
-    <hr>
     <script type='text/javascript'>
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');

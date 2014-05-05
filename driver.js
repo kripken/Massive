@@ -11,7 +11,7 @@ function makeMainThreadBenchmark(name, args) {
           var worker = this;
           // create the iframe and set up communication
           var frame = document.createElement('iframe');
-          frame.width = document.body.clientWidth*0.9;
+          frame.width = document.body.clientWidth*0.6;
           frame.height = document.body.clientHeight*0.2;
           frame.src = 'responsiveness.html'
           window.onmessage = function(event) {
@@ -33,7 +33,7 @@ function makeMainThreadBenchmark(name, args) {
       return Math.max(1/30, this.msg.mainThread/1000);
     },
     normalized: function() {
-      return (args.cold ? 2.5 : 1)/this.calculate();
+      return 0.33/this.calculate();
     },
   };
 }
