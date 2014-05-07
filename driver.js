@@ -302,7 +302,7 @@ var jobs = [
       return parsed.deviation;
     },
     normalized: function() {
-      return (50/this.calculate());
+      return (3.5/this.calculate());
     },
   },
 ];

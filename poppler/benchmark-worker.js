@@ -53,6 +53,11 @@ onmessage = function(event) {
 
       if (--pagesLeft === 0) {
         var time = Date.now() - start;
+
+        // clear out the top frame from the averages - one of the later pages in this pdf is very slow to render
+        pageTimes -= pageMax;
+        pageTimes2 -= Math.pow(pageMax, 2);
+
         postMessage({
           benchmark: msg.benchmark,
           runtime: time,
