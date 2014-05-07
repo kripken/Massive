@@ -37,13 +37,28 @@ onmessage = function(event) {
     // prepare code, add data, and run
     var start = Date.now();
     var pagesLeft = 215;
+    var pageTimer = 0, pageTimes = 0, pageTimes2 = 0, pageCounter = 0, pageMax = 0;
     Module.print = function(x) {
       Module.printBuffer += x + '\n';
+
+      var now = Date.now();
+      if (pageTimer > 0) {
+        var delta = now - pageTimer;
+        pageTimes += delta;
+        pageTimes2 += Math.pow(delta, 2);
+        pageCounter++;
+        pageMax = Math.max(pageMax, delta);
+      }
+      pageTimer = now;
+
       if (--pagesLeft === 0) {
         var time = Date.now() - start;
         postMessage({
           benchmark: msg.benchmark,
           runtime: time,
+          average: pageTimes/pageCounter,
+          highest: pageMax,
+          deviation: Math.sqrt(pageTimes2/pageCounter - Math.pow(pageTimes/pageCounter, 2)),
           //output: Module.printBuffer
         });
       }

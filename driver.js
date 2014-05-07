@@ -160,7 +160,7 @@ var jobs = [
   },
   // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
-    benchmark: 'poppler',
+    benchmark: 'poppler-throughput',
     description: 'Poppler PDF performance: startup + rendering',
     scale: 'seconds (lower numbers are better)',
     args: [],
@@ -281,6 +281,28 @@ var jobs = [
     },
     normalized: function() {
       return (1/this.calculate());
+    },
+  },
+  {
+    benchmark: 'poppler-variance',
+    description: 'Poppler PDF performance: frame rate variance',
+    scale: 'milliseconds (lower numbers are better)',
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          this.onmessage({ data: {
+            benchmark: 'poppler-variance'
+          }});
+        },
+        terminate: function(){},
+      };
+    },
+    calculate: function() {
+      var parsed = jobMap['poppler-throughput'].msg;
+      return parsed.deviation;
+    },
+    normalized: function() {
+      return (50/this.calculate());
     },
   },
 ];
