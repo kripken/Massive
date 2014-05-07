@@ -45,7 +45,7 @@ function makeMainThreadBenchmark(name, args) {
       return Math.max(1/30, this.msg.mainThread/1000);
     },
     normalized: function() {
-      return 0.33/this.calculate();
+      return args.factor/this.calculate();
     },
   };
 }
@@ -60,8 +60,10 @@ var jobs = [
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS }),
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
