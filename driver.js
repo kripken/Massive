@@ -52,13 +52,16 @@ function makeMainThreadBenchmark(name, args) {
 
 var jobMap = {};
 
+var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
+var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
+
 var jobs = [
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
-  // build instructions: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false }),
+  // build instructionses: see below
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 

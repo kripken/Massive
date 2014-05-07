@@ -120,12 +120,11 @@
         var params = event.data;
         var parentWindow = event.source;
 
-        Module.arguments = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5']
-
+        Module.arguments = params.arguments;
         var cold = params.cold;
-        var url = 'poppler/poppler.js';
-        var data = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
-        var prints = 5;
+        var url = params.url;
+        var data = params.data;
+        var prints = params.prints;
 
         var interval;
         var startTime = -Infinity;
