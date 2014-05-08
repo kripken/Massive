@@ -64,6 +64,8 @@ var jobs = [
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
   makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
   makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
+  //makeMainThreadBenchmark('lua-cold', { cold: true,  url: 'lua/lua.vm.js', prints: 0, arguments: [], factor: 0.12, evil: "Lua.execute('local x = 1000000; while x > 0 do x = x - 1; end');" }),
+  //makeMainThreadBenchmark('lua-warm', { cold: false, url: 'lua/lua.vm.js', prints: 0, arguments: [], factor: 0.12, evil: "Lua.execute('local x = 1000000; while x > 0 do x = x - 1; end');" }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -170,7 +172,7 @@ var jobs = [
     scale: 'seconds (lower numbers are better)',
     args: [],
     createWorker: function() {
-      return new Worker('poppler/benchmark-worker.js')
+      return new Worker('poppler/benchmark-worker.js');
     },
     calculate: function() {
       return Math.max(1/30, this.msg.runtime/1000);

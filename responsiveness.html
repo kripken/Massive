@@ -20,7 +20,6 @@
   <body>
     <p>An 'X' should move around, indicating responsiveness</p>
     <textarea id="spinner" cols=20 maxlength=20 disabled=1>X</textarea>
-    <div class="emscripten" id="status"></div>
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>  
     </div>
@@ -39,7 +38,6 @@
       <hr>
     </div>
     <script type='text/javascript'>
-      var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
 
       var Module = {
@@ -68,31 +66,11 @@
           }
         },
         canvas: document.getElementById('canvas'),
-        setStatus: function(text) {
-          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
-          if (text === Module.setStatus.text) return;
-          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-          var now = Date.now();
-          if (m && now - Date.now() < 30) return; // if this is a progress update, skip it if too soon
-          if (m) {
-            text = m[1];
-            progressElement.value = parseInt(m[2])*100;
-            progressElement.max = parseInt(m[4])*100;
-            progressElement.hidden = false;
-          } else {
-            progressElement.value = null;
-            progressElement.max = null;
-            progressElement.hidden = true;
-          }
-          statusElement.innerHTML = '';//text;
-        },
         totalDependencies: 0,
         monitorRunDependencies: function(left) {
           this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
         }
       };
-      Module.setStatus('Downloading...');
     </script>
     <script>
       var spinnerElement = document.getElementById('spinner');
@@ -125,9 +103,29 @@
         var url = params.url;
         var data = params.data;
         var prints = params.prints;
+        var evil = params.evil;
 
         var interval;
         var startTime = -Infinity;
+
+        function finish() {
+          noticeFrame(); // see the last frame before we quit
+          clearInterval(interval);
+
+          if (evil) {
+            // execute code, and add that to main thread pause time
+            total -= Date.now();
+            eval(evil);
+            total += Date.now();
+          }
+
+          Module.print = function(){};
+          if (cleanup) cleanup();
+          var output = { benchmark: event.benchmark, mainThread: total, walltime: Date.now() - startTime, text: printBuffer }
+          //alert(JSON.stringify(output));
+          parentWindow.postMessage(output, event.origin);
+          if (Module.pauseMainLoop) Module.pauseMainLoop();
+        }
 
         var oldPrint = Module.print;
         var printBuffer = '';
@@ -136,14 +134,7 @@
           oldPrint(x);
           // see when the run is over
           if (--prints === 0) {
-            noticeFrame(); // see the last frame before we quit
-            clearInterval(interval);
-            Module.print = function(){};
-            if (cleanup) cleanup();
-            var output = { benchmark: event.benchmark, mainThread: total, walltime: Date.now() - startTime, text: printBuffer }
-            //alert(JSON.stringify(output));
-            parentWindow.postMessage(output, event.origin);
-            if (Module.pauseMainLoop) Module.pauseMainLoop();
+            finish();
           }
         };
 
@@ -171,6 +162,11 @@
 
         function runBenchmark() {
           startTime = Date.now();
+          if (prints === 0) {
+            script.onload = function() {
+              finish();
+            };
+          }
           script.src = src;
           interval = setInterval(noticeFrame, 1000/60);
           document.body.appendChild(script);
@@ -197,6 +193,10 @@
           runBenchmark();
         }
       };
+
+      //window.onmessage({ data:
+      //  { cold: true,  url: 'lua/lua.vm.js', prints: 0, arguments: [], factor: 0.12, evil: "Lua.execute('local x = 1000000; while x > 0 do x = x - 1; end');" }
+      //});
     </script>
   </body>
 </html>
