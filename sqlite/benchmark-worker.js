@@ -9,14 +9,17 @@ if (typeof console === 'undefined') console = { log: function(){} };
 onmessage = function(event) {
   var msg = event.data;
 
-  function calcTime(output) {
-    var m = /create table : took (\d+) ms\n\d+,\d+ inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects with indexes : took (\d+) ms/.exec(output) || [];
+  function calcTime() {
+    var m = /create table : took (\d+) ms\n\d+,\d+ inserts : took (\d+) ms\ncommit : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects : took (\d+) ms\ncreate indexes : took (\d+) ms\ncount\(\*\) = \d+\n\ncount\(\*\) = \d+\n\nselects with indexes : took (\d+) ms/.exec(Module.printBuffer) || [];
     m = m.map(parseFloat);
     return (m[1]+m[2]+m[3]+m[4]+m[5]+m[6])/1000;
   }
 
-  if (msg.args === 'cold') {
+  if (msg.args.indexOf('startup') >= 0) {
     Module.arguments = ['0', '0'];
+  }
+
+  if (msg.args.indexOf('cold') >= 0) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'sqlite.js', false);
     xhr.send(null);
@@ -29,7 +32,7 @@ onmessage = function(event) {
     postMessage({
       benchmark: msg.benchmark,
       runtime: time,
-      calcTime: calcTime(output)
+      calcTime: calcTime()
     });
     return;
   }
@@ -43,7 +46,7 @@ onmessage = function(event) {
   postMessage({
     benchmark: msg.benchmark,
     runtime: time,
-    calcTime: calcTime(Module.printBuffer)
+    calcTime: calcTime()
   });
 };
 

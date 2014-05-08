@@ -56,12 +56,15 @@ var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
 var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
 
 var jobs = [
+
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.2 }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.16 }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -97,38 +100,6 @@ var jobs = [
       return (10/this.calculate());
     },
   },
-/*
-  {
-    benchmark: 'box2d-cold-startup',
-    description: 'how long a cold startup takes for Box2D',
-    scale: 'seconds (lower numbers are better)',
-    args: 'cold',
-    createWorker: function() {
-      return new Worker('box2d/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.runtime/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60);
-    },
-  },
-  {
-    benchmark: 'box2d-warm-startup',
-    description: 'how long a warm startup takes for Box2D',
-    scale: 'seconds (lower numbers are better)',
-    args: ['0'],
-    createWorker: function() {
-      return new Worker('box2d/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.runtime/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60);
-    },
-  },
-*/
 
   // lua. build instructions: use lua.vm.js project build system
   {
@@ -178,12 +149,12 @@ var jobs = [
     },
   },
 
-  // sqlite. build instructions: run asm3.test_sqlite in emscripten test suite
+  // sqlite. build instructions: run asm3.test_sqlite in emscripten test suite with OUTLINING_LIMIT 60000
   {
-    benchmark: 'sqlite',
+    benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
     scale: 'seconds (lower numbers are better)',
-    args: ['20000', '25'],
+    args: ['15000', '10'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
     },
@@ -197,38 +168,6 @@ var jobs = [
 
   { title: 'Preparation', description: 'Tests how fast a casebase is loaded and ready to run' },
 
-  { // do startup last so there is no network access
-    benchmark: 'lua-cold-preparation',
-    description: 'how long a cold preparation takes the compiled Lua VM',
-    scale: 'seconds (lower numbers are better)',
-    args: null,
-    createWorker: function() {
-      return new Worker('lua/benchmark-worker-cold-startup.js')
-    },
-    calculate: function() {
-      return this.msg.startup/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
-    },
-  },
-  {
-    benchmark: 'lua-warm-preparation',
-    description: 'how long a warm preparation takes the compiled Lua VM',
-    scale: 'seconds (lower numbers are better)',
-    args: null,
-    totalReps: 2,
-    warmupReps: 1,
-    createWorker: function() {
-      return new Worker('lua/benchmark-worker.js')
-    },
-    calculate: function() {
-      return this.msg.startup/1000;
-    },
-    normalized: function() {
-      return 0.10/Math.max(this.calculate(), 1/60); // resolution: 1 frame
-    },
-  },
   {
     benchmark: 'poppler-cold-preparation',
     description: 'how long a cold preparation takes Poppler',
@@ -259,6 +198,38 @@ var jobs = [
     },
     normalized: function() {
       return 0.13/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'sqlite-cold-preparation',
+    description: 'how long a cold preparation takes SQLite',
+    scale: 'seconds (lower numbers are better)',
+    args: ['startup', 'cold'],
+    createWorker: function() {
+      return new Worker('sqlite/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 0.50/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'sqlite-warm-preparation',
+    description: 'how long a warm preparation takes SQLite',
+    scale: 'seconds (lower numbers are better)',
+    args: ['startup', 'warm'],
+    totalReps: 2,
+    warmupReps: 1,
+    createWorker: function() {
+      return new Worker('sqlite/benchmark-worker.js')
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return 0.50/Math.max(this.calculate(), 1/60); // resolution: 1 frame
     },
   },
 
