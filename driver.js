@@ -135,7 +135,7 @@ var jobs = [
   // poppler. build instructions: run asm3.test_poppler in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler-throughput',
-    description: 'Poppler PDF performance: startup + rendering',
+    description: 'Poppler PDF rendering performance',
     scale: 'seconds (lower numbers are better)',
     args: [],
     createWorker: function() {
