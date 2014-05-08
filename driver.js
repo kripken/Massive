@@ -10,11 +10,15 @@ function prettyNumber(x) {
   return ret;
 }
 
+var SECONDS = 'seconds (lower is better)';
+var MILLISECONDS = 'milliseconds (lower is better)';
+var MFLOPS = 'MFLOPS (higher is better)';
+
 function makeMainThreadBenchmark(name, args) {
   return {
     benchmark: 'main-thread-' + name,
     description: 'Responsiveness during poppler PDF rendering on the main thread',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     totalReps: 3,
     warmupReps: args.cold ? 0 : 1,
     createWorker: function() {
@@ -72,7 +76,7 @@ var jobs = [
   {
     benchmark: 'box2d-throughput',
     description: 'Box2D physics: average frame rate',
-    scale: 'milliseconds (lower numbers are better)',
+    scale: MILLISECONDS,
     args: ['3'],
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
@@ -88,7 +92,7 @@ var jobs = [
   {
     benchmark: 'box2d-throughput-f32',
     description: 'Box2D physics: average frame rate w/ Math.fround',
-    scale: 'milliseconds (lower numbers are better)',
+    scale: MILLISECONDS,
     args: ['3'],
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
@@ -105,7 +109,7 @@ var jobs = [
   {
     benchmark: 'lua-binarytrees',
     description: 'GC performance in compiled Lua VM',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['binarytrees.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -120,7 +124,7 @@ var jobs = [
   {
     benchmark: 'lua-scimark',
     description: 'numeric computation performance in compiled Lua VM',
-    scale: 'MFLOPS (higher numbers are better)',
+    scale: MFLOPS,
     args: ['scimark.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js')
@@ -136,7 +140,7 @@ var jobs = [
   {
     benchmark: 'poppler-throughput',
     description: 'Poppler PDF rendering performance',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: [],
     createWorker: function() {
       return new Worker('poppler/benchmark-worker.js');
@@ -153,7 +157,7 @@ var jobs = [
   {
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['15000', '10'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
@@ -171,7 +175,7 @@ var jobs = [
   {
     benchmark: 'poppler-cold-preparation',
     description: 'how long a cold preparation takes Poppler',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['startup'],
     createWorker: function() {
       return new Worker('poppler/benchmark-worker.js')
@@ -186,7 +190,7 @@ var jobs = [
   {
     benchmark: 'poppler-warm-preparation',
     description: 'how long a warm preparation takes Poppler',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['startup', 'warm'],
     totalReps: 2,
     warmupReps: 1,
@@ -203,7 +207,7 @@ var jobs = [
   {
     benchmark: 'sqlite-cold-preparation',
     description: 'how long a cold preparation takes SQLite',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['startup', 'cold'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
@@ -218,7 +222,7 @@ var jobs = [
   {
     benchmark: 'sqlite-warm-preparation',
     description: 'how long a warm preparation takes SQLite',
-    scale: 'seconds (lower numbers are better)',
+    scale: SECONDS,
     args: ['startup', 'warm'],
     totalReps: 2,
     warmupReps: 1,
@@ -238,7 +242,7 @@ var jobs = [
   {
     benchmark: 'box2d-variance',
     description: 'Box2D physics: frame rate variance',
-    scale: 'milliseconds (lower numbers are better)',
+    scale: MILLISECONDS,
     createWorker: function() {
       return {
         postMessage: function() {
@@ -260,7 +264,7 @@ var jobs = [
   {
     benchmark: 'poppler-variance',
     description: 'Poppler PDF performance: frame rate variance',
-    scale: 'milliseconds (lower numbers are better)',
+    scale: MILLISECONDS,
     createWorker: function() {
       return {
         postMessage: function() {
@@ -315,7 +319,7 @@ function run() {
 
     var job = jobs[curr++];
     if (!job) {
-      theButton.innerHTML = 'Score: <strong>' + prettyNumber(finalCalculation()) + '</strong> (higher numbers are better)';
+      theButton.innerHTML = 'Score: <strong>' + prettyNumber(finalCalculation()) + '</strong> (higher is better)';
       theButton.classList.remove('btn-warning');
       theButton.classList.add('btn-success');
       return;
