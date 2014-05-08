@@ -62,10 +62,6 @@ var jobs = [
   // build instructionses: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['1000'], factor: 0.12 }),
-  //makeMainThreadBenchmark('lua-cold', { cold: true,  url: 'lua/lua.vm.js', prints: 0, arguments: [], factor: 0.12, evil: "Lua.execute('local x = 1000000; while x > 0 do x = x - 1; end');" }),
-  //makeMainThreadBenchmark('lua-warm', { cold: false, url: 'lua/lua.vm.js', prints: 0, arguments: [], factor: 0.12, evil: "Lua.execute('local x = 1000000; while x > 0 do x = x - 1; end');" }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -165,7 +161,7 @@ var jobs = [
       return this.calculate()/10;
     },
   },
-  // poppler. build instructions: run asm3.test_sqlite in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
+  // poppler. build instructions: run asm3.test_poppler in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler-throughput',
     description: 'Poppler PDF performance: startup + rendering',

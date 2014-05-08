@@ -81,7 +81,7 @@
         var now = Date.now();
         if (lastTime) {
           var curr = Math.max(0, now - lastTime - 1000/30); // measure positive deviations from 1/30 frame rates, minimal that looks ok
-          //Module.printErr([Math.round(now - lastTime), Math.round(curr)]);
+          //console.log('noticeFrame ' + [Math.round(now - lastTime), total]);
           total += curr;
         }
         lastTime = now;
@@ -114,9 +114,11 @@
 
           if (evil) {
             // execute code, and add that to main thread pause time
-            total -= Date.now();
+            var start = Date.now();
             eval(evil);
-            total += Date.now();
+            var diff = Date.now() - start;
+            total += diff;
+            console.log('evil eval time: ' + diff);
           }
 
           Module.print = function(){};
@@ -168,6 +170,7 @@
             };
           }
           script.src = src;
+          noticeFrame(); // start looking at responsiveness right now
           interval = setInterval(noticeFrame, 1000/60);
           document.body.appendChild(script);
         }
