@@ -95,7 +95,8 @@
              experience and other events).</p>
           <p><b>Throughput</b> measures how fast a large computational workload runs. This is what is typically measured by
              benchmarks. Massive's throughput tests focus on very large real-world codebases.</p>
-          <p><b>Preparation</b> measures how long (in wall time) is spent to get a codebase ready to execute. This measures how much
+          <p><b>Preparation</b> measures how long (in wall time) is spent to get a codebase ready to execute, before
+             executing any of it. This measures how much
              time passes between adding a script tag with that code and being able to call the code (this may or may not
              cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; Main Thread Responsiveness
              tests that aspect). "Preparation" is basically all the time before code is actually able to run; that may include
