@@ -99,7 +99,7 @@
              time passes between adding a script tag with that code and being able to call the code (this may or may not
              cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; Main Thread Responsiveness
              tests that aspect). "Preparation" is basically all the time before code is actually able to run; that may include
-             parsing, conversion to bitcode, JIT compilation, etc., depending in the JS engine.</p>
+             parsing, conversion to bitcode, JIT compilation, etc., depending on the JS engine.</p>
           <p><b>Variance</b> measures how variable the frame rate is in an application that needs to run in each frame
              (this is important in things like games, which much finish all they need every 1/60 of a second, in order to be
              smooth). Specifically, we run many frames and then calculate the statistical variance and worst case. Note that
