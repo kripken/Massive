@@ -52,6 +52,7 @@
         <br>
         <p><a href="#" class="btn btn-primary btn-large " onclick="run(); return false" id="the_button">Run the benchmark now! &raquo;</a></p>
         <p id="warning"><small>(Benchmark will take a while to run, and some browsers may become less responsive for part of that time.)</small></p>
+        <p><center style="font-weight: bold; color: #b31">This benchmark is a work in progress, and is NOT ready yet!</center></p>
       </div>
 
       <div class="row-fluid" id="results_area" hidden=1>
@@ -74,16 +75,38 @@
         </div>
       </div>
 
+<script>
+function toggleFaq() {
+  var button = document.getElementById('faq-button');
+  var faq = document.getElementById('faq');
+  if (faq.style.display == 'none') {
+    faq.style.display = 'block';
+    button.innerHTML = 'Hide';
+  } else {
+    faq.style.display = 'none';
+    button.innerHTML = 'Show';
+  }
+}
+</script>
+
       <div class="row-fluid">
         <div class="span">
-          <h3>FAQ</h3>
-          <h4>Is this benchmark ready?</h4>
-          <p>No, it is a work in progress.</p>
-          <h4>How does this relate to the Emscripten benchmark suite?</h4>
-          <p>The <a href="http://kripken.github.io/embenchen/">Emscripten benchmark suite</a> developed over time in order
+          <h3>
+            FAQ
+            <button id="faq-button" type="button" class="btn" onclick="toggleFaq()">Show</button>
+          </h3>
+        </div>
+        <div id="faq" style="display: none">
+          <h4>Why make a new benchmark?</h4>
+          <p>asm.js appears in one test in Octane, but otherwise is not present in the main JavaScript benchmarks. And asm.js
+             often appears as large source files, which can cause different performance characteristics than the typical
+             small programs appearing in most benchmarks. For those reasons, a new asm.js benchmark is useful.</p>
+          <h4>How does this relate to the Emscripten benchmark suite - what does this offer over that?</h4>
+          <p>The <a href="http://kripken.github.io/embenchen/">Emscripten benchmark suite</a> evolved over time in order
              to benchmark Emscripten itself, and therefore mainly focused on throughput, and is runnable in both shell and
              browser. Massive, on the other hand, tests not just
-             throughput but also browser responsiveness and other factors that only make sense when running in a browser.</p>
+             throughput but also browser responsiveness and other factors that only make sense when running in a browser, things
+             not measured by the Emscripten benchmark suite (or by the main JavaScript benchmarks).</p>
           <a name="explanations"></a>
           <h4>What do the categories ("Main Thread Responsiveness", "Throughput", "Preparation", and "Variance") mean?</h4>
           <p><b>Main Thread Responsiveness</b> measures the user experience as a large codebase is loaded. What is tested is whether
