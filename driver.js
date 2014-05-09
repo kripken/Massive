@@ -10,8 +10,8 @@ function prettyInteger(x) {
   return ret;
 }
 
-var SECONDS = 'seconds (<b>lower</b> is better)';
-var MILLISECONDS = 'milliseconds (<b>lower</b> is better)';
+var SECONDS = 'seconds (lower is better)';
+var MILLISECONDS = 'milliseconds (lower is better)';
 var MFLOPS = 'MFLOPS (<b>higher</b> is better)';
 
 function makeMainThreadBenchmark(name, args) {
