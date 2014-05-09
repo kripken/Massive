@@ -329,7 +329,7 @@ function run() {
                              '  <td style="background-color:#ddd"></td>' +
                              '  <td style="background-color:#ddd"></td>' +
                              '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a href="#explanations">details</a>)' : '') + '</td>' +
-                             '  <td style="background-color:#ddd"></td>' +
+                             //'  <td style="background-color:#ddd"></td>' +
                              '</tr>';
       setTimeout(runJob, 1);
       return;
@@ -342,7 +342,7 @@ function run() {
                            '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
                            '  <td>' + job.scale + '</td>' +
                            '  <td>' + (job.description || '') + '</td>' +
-                           '  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
+                           //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
                            '</tr>';
 
     document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
@@ -375,8 +375,8 @@ function run() {
 
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
-      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
-      document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
+      //document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
+      //document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
         runJob();
       }, 1);
