@@ -10,14 +10,14 @@ function prettyNumber(x) {
   return ret;
 }
 
-var SECONDS = 'seconds (lower is better)';
-var MILLISECONDS = 'milliseconds (lower is better)';
-var MFLOPS = 'MFLOPS (higher is better)';
+var SECONDS = 'seconds (<b>lower</b> is better)';
+var MILLISECONDS = 'milliseconds (<b>lower</b> is better)';
+var MFLOPS = 'MFLOPS (<b>higher</b> is better)';
 
 function makeMainThreadBenchmark(name, args) {
   return {
     benchmark: 'main-thread-' + name,
-    description: 'Responsiveness during poppler PDF rendering on the main thread',
+    description: 'Responsiveness during ' + args.description + ' on the main thread',
     scale: SECONDS,
     totalReps: 3,
     warmupReps: args.cold ? 0 : 1,
@@ -65,10 +65,10 @@ var jobs = [
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33 }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.2 }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.16 }),
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33, description: 'Poppler PDF rendering' }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33, description: 'Poppler PDF rendering' }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.2, description: 'SQLite operations' }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.16, description: 'SQLite operations' }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
