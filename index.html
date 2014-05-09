@@ -132,6 +132,12 @@ function toggleFaq() {
              things are less clear (perhaps we are happy to get some average slowdown in order to reduce variance which can
              cause noticable but rare pauses?). Hence we measure variance separately from throughput (which is a measurement of the total
              speed, and is proportional to the average).</p>
+          <h4>How consistent are these results between runs of the benchmark suite?</h4>
+          <p>Most of the tests, in particular the throughput ones, are generally very consistent, as we run a deterministic workload
+             in a web worker, which minimizes outside noise. We also run a few repetitions and average the results. However, in particular
+             the Main Thread Responsiveness tests need to run on the main thread, and they involve DOM events like adding a script tag,
+             setInterval, etc., which can be fairly variable. We run a larger amount of repetitions on those tests to average out the
+             noise, but even so they appear to be less consistent between runs on some browsers.</p>
         </div>
       </div>
 
