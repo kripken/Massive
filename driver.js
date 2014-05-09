@@ -1,6 +1,6 @@
 
-function prettyNumber(x) {
-  x = '' + x;
+function prettyInteger(x) {
+  x = '' + Math.round(x);
   var chars = x.split('');
   var ret = '';
   for (var i = 0; i < x.length; i++) {
@@ -49,7 +49,7 @@ function makeMainThreadBenchmark(name, args) {
       return Math.max(1/30, this.msg.mainThread/1000);
     },
     normalized: function() {
-      return args.factor/this.calculate();
+      return (args.factor || 1/30)/this.calculate();
     },
   };
 }
@@ -65,10 +65,10 @@ var jobs = [
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33, description: 'Poppler PDF rendering' }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, factor: 0.33, description: 'Poppler PDF rendering' }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.2, description: 'SQLite operations' }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], factor: 0.16, description: 'SQLite operations' }),
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering' }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering' }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations' }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations' }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -166,7 +166,7 @@ var jobs = [
       return this.msg.calcTime;
     },
     normalized: function() {
-      return 8.0/Math.max(this.calculate(), 1/60);
+      return 8.0/this.calculate();
     },
   },
 
@@ -184,7 +184,7 @@ var jobs = [
       return this.msg.startup/1000;
     },
     normalized: function() {
-      return 0.40/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+      return (1/30)/Math.max(this.calculate(), 1/30);
     },
   },
   {
@@ -201,7 +201,7 @@ var jobs = [
       return this.msg.startup/1000;
     },
     normalized: function() {
-      return 0.13/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+      return (1/30)/Math.max(this.calculate(), 1/30);
     },
   },
   {
@@ -216,7 +216,7 @@ var jobs = [
       return this.msg.runtime/1000;
     },
     normalized: function() {
-      return 0.50/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+      return (1/30)/Math.max(this.calculate(), 1/30); // resolution: 1 frame
     },
   },
   {
@@ -233,7 +233,7 @@ var jobs = [
       return this.msg.runtime/1000;
     },
     normalized: function() {
-      return 0.50/Math.max(this.calculate(), 1/60); // resolution: 1 frame
+      return (1/30)/Math.max(this.calculate(), 1/30); // resolution: 1 frame
     },
   },
 
@@ -258,7 +258,7 @@ var jobs = [
       return (2*parsed.variance + (parsed.highest - parsed.average))/3;
     },
     normalized: function() {
-      return (1/this.calculate());
+      return 1/Math.max(1, this.calculate());
     },
   },
   {
@@ -280,13 +280,13 @@ var jobs = [
       return parsed.deviation;
     },
     normalized: function() {
-      return (3.5/this.calculate());
+      return 1/Math.max(1, this.calculate());
     },
   },
 ];
 
 function normalize(job) {
-  return Math.round(10000 * job.normalized());
+  return 10000 * job.normalized();
 }
 
 var ran = false;
@@ -308,9 +308,7 @@ function run() {
   function finalCalculation() {
     // normalize based on experimental data
     var normalized = jobs.filter(function(job) { return job.normalized }).map(function(job) { return normalize(job) });
-    return Math.round(
-      normalized.map(function(x) { return Math.pow(x, 1/normalized.length) }).reduce(function(x, y) { return x * y }, 1)
-    );
+    return normalized.map(function(x) { return Math.pow(x, 1/normalized.length) }).reduce(function(x, y) { return x * y }, 1)
   }
 
   var curr = 0;
@@ -319,7 +317,8 @@ function run() {
 
     var job = jobs[curr++];
     if (!job) {
-      theButton.innerHTML = 'Score: <strong>' + prettyNumber(finalCalculation()) + '</strong> (higher is better)';
+      // All benchmarks complete!
+      theButton.innerHTML = 'Score: <strong>' + prettyInteger(finalCalculation()) + '</strong> (higher is better)';
       theButton.classList.remove('btn-warning');
       theButton.classList.add('btn-success');
       return;
@@ -376,7 +375,7 @@ function run() {
 
       document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
       document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
-      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyNumber(normalize(job)) + '</b>';
+      document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
       document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
         runJob();
