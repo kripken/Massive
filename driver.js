@@ -266,7 +266,7 @@ var jobs = [
       return (2*parsed.variance + (parsed.highest - parsed.average))/3;
     },
     normalized: function() {
-      return 1/Math.max(1, this.calculate());
+      return 5/Math.max(5, this.calculate()); // less than 5ms is perfect
     },
   },
   {
@@ -288,7 +288,7 @@ var jobs = [
       return parsed.deviation;
     },
     normalized: function() {
-      return 1/Math.max(1, this.calculate());
+      return 5/Math.max(5, this.calculate()); // less than 5ms is perfect
     },
   },
 ];
