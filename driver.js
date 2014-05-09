@@ -19,8 +19,8 @@ function makeMainThreadBenchmark(name, args) {
     benchmark: 'main-thread-' + name,
     description: 'Responsiveness during ' + args.description + ' on the main thread',
     scale: SECONDS,
-    totalReps: 3,
-    warmupReps: args.cold ? 0 : 1,
+    totalReps: args.totalReps,
+    warmupReps: args.warmupReps,
     createWorker: function() {
       return {
         postMessage: function() {
@@ -65,10 +65,14 @@ var jobs = [
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering' }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering' }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations' }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations' }),
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
+                          totalReps: 5, warmupReps: 0 }),
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
+                          totalReps: 6, warmupReps: 1 }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations',
+                          totalReps: 9, warmupReps: 0 }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations',
+                          totalReps: 10, warmupReps: 1 }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -78,6 +82,7 @@ var jobs = [
     description: 'Box2D physics: average frame rate',
     scale: MILLISECONDS,
     args: ['3'],
+    totalReps: 4, // more reps to stabilize variance, which is more variable
     createWorker: function() {
       return new Worker('box2d/benchmark-worker.js')
     },
@@ -142,6 +147,7 @@ var jobs = [
     description: 'Poppler PDF rendering performance',
     scale: SECONDS,
     args: [],
+    totalReps: 4, // more reps to stabilize variance, which is more variable
     createWorker: function() {
       return new Worker('poppler/benchmark-worker.js');
     },
@@ -177,6 +183,7 @@ var jobs = [
     description: 'how long a cold preparation takes Poppler',
     scale: SECONDS,
     args: ['startup'],
+    totalReps: 4,
     createWorker: function() {
       return new Worker('poppler/benchmark-worker.js')
     },
@@ -192,7 +199,7 @@ var jobs = [
     description: 'how long a warm preparation takes Poppler',
     scale: SECONDS,
     args: ['startup', 'warm'],
-    totalReps: 2,
+    totalReps: 5,
     warmupReps: 1,
     createWorker: function() {
       return new Worker('poppler/benchmark-worker.js')
@@ -209,6 +216,7 @@ var jobs = [
     description: 'how long a cold preparation takes SQLite',
     scale: SECONDS,
     args: ['startup', 'cold'],
+    totalReps: 6,
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
     },
@@ -224,7 +232,7 @@ var jobs = [
     description: 'how long a warm preparation takes SQLite',
     scale: SECONDS,
     args: ['startup', 'warm'],
-    totalReps: 2,
+    totalReps: 7,
     warmupReps: 1,
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
@@ -350,7 +358,7 @@ function run() {
 
     // Run the job the specified number of times
     var reps = 0;
-    var totalReps = job.totalReps || 1;
+    var totalReps = job.totalReps || 2;
     var warmupReps = job.warmupReps || 0;
     var results = [];
 
