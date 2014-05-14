@@ -306,7 +306,11 @@ function run() {
   document.getElementById('warning').hidden = true;
 
   var tableBody = document.getElementById('table_body');
-  tableBody.innerHTML = '';
+  var tableBodyLines = jobs.map(function(job) { return '<tr><td>' + (job.title ? '<b>' + job.title + '</b>' : job.benchmark) + '</td><td></td><td></td><td></td></tr>'; });
+  function flushTable() {
+    tableBody.innerHTML = tableBodyLines.join('\n');
+  }
+  flushTable();
 
   var theButton = document.getElementById('the_button');
   theButton.innerHTML = 'Running benchmarks... (this can take a while)';
@@ -332,29 +336,31 @@ function run() {
       return;
     }
     if (job.title) {
-      tableBody.innerHTML += '<tr>' +
-                             '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
-                             '  <td style="background-color:#ddd"></td>' +
-                             '  <td style="background-color:#ddd"></td>' +
-                             '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a href="#explanations">details</a>)' : '') + '</td>' +
-                             //'  <td style="background-color:#ddd"></td>' +
-                             '</tr>';
+      tableBodyLines[curr-1] = '<tr>' +
+                               '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
+                               '  <td style="background-color:#ddd"></td>' +
+                               '  <td style="background-color:#ddd"></td>' +
+                               '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a href="#explanations">details</a>)' : '') + '</td>' +
+                               //'  <td style="background-color:#ddd"></td>' +
+                               '</tr>';
+      flushTable();
       setTimeout(runJob, 1);
       return;
     }
 
     jobMap[job.benchmark] = job;
 
-    tableBody.innerHTML += '<tr>' +
-                           '  <td>' + job.benchmark + '</td>' +
-                           '  <td id="' + job.benchmark + '-cell"><div id="' + job.benchmark + '-output" class="text-center"></div></td>' +
-                           '  <td>' + job.scale + '</td>' +
-                           '  <td>' + (job.description || '') + '</td>' +
-                           //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
-                           '</tr>';
-
-    document.getElementById(job.benchmark + '-output').innerHTML = '<b>(..running..)</b>';
-    document.getElementById(job.benchmark + '-cell').style = 'background-color: #ffddaa';
+    function emitBenchmarkLine(result, style) {
+      tableBodyLines[curr-1] = '<tr>' +
+                               '  <td>' + job.benchmark + '</td>' +
+                               '  <td style="' + style + '"><div class="text-center">' + result + '</div></td>' +
+                               '  <td>' + job.scale + '</td>' +
+                               '  <td>' + (job.description || '') + '</td>' +
+                               //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
+                               '</tr>';
+    }
+    emitBenchmarkLine('<b>(..running..)</b>', 'background-color: #ffddaa');
+    flushTable();
 
     // Run the job the specified number of times
     var reps = 0;
@@ -381,8 +387,8 @@ function run() {
       job.msg = final;
       console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
-      document.getElementById(job.benchmark + '-output').innerHTML = '<b>' + job.calculate().toFixed(3) + '</b>';
-      document.getElementById(job.benchmark + '-cell').style = 'background-color: #bbccff';
+      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + '</b>', 'background-color: #bbccff');
+      flushTable();
       //document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
       //document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
       setTimeout(function() {
