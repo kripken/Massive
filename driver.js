@@ -66,13 +66,13 @@ var jobs = [
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
-                          totalReps: 5, warmupReps: 0 }),
+                          totalReps: 6, warmupReps: 0 }),
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
-                          totalReps: 6, warmupReps: 1 }),
+                          totalReps: 7, warmupReps: 1 }),
   makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
-                          totalReps: 5, warmupReps: 0 }),
+                          totalReps: 8, warmupReps: 0 }),
   makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
-                          totalReps: 6, warmupReps: 1 }),
+                          totalReps: 9, warmupReps: 1 }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -370,7 +370,7 @@ function run() {
 
     function finish() {
       console.log('final: ' + JSON.stringify(results));
-      var final = {};
+      var final = {}, sum = 0, squares = 0;
       for (var i = warmupReps; i < totalReps; i++) {
         var result = results[i];
         for (var k in result) {
@@ -378,7 +378,21 @@ function run() {
             final[k] = (final[k] || 0) + result[k];
           }
         }
+        job.msg = result;
+        var curr = job.calculate();
+        job.msg = null;
+        sum += curr;
+        squares += curr*curr;
       }
+      // check for excessive variability
+      var n = totalReps - warmupReps;
+      var mean = sum/n;
+      var mean2 = squares/n;
+      var std = Math.sqrt(mean2 - mean*mean);
+      var noise = Math.abs(std/mean)/Math.sqrt(n);
+      var tooVariable = noise > 0.2;
+
+      // calculate final score
       for (var k in final) {
         if (typeof final[k] === 'number') {
           final[k] /= totalReps - warmupReps;
@@ -387,7 +401,7 @@ function run() {
       job.msg = final;
       console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
-      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + '</b>', 'background-color: #bbccff');
+      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + (tooVariable ? ' <a href="#toovariable">(±' + Math.round(100*noise) + '%!)</a>' : '') + '</b>', 'background-color: #bbccff');
       flushTable();
       //document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
       //document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';

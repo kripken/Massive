@@ -138,6 +138,10 @@ function toggleFaq() {
              the Main Thread Responsiveness tests need to run on the main thread, and they involve DOM events like adding a script tag,
              setInterval, etc., which can be fairly variable. We run a larger amount of repetitions on those tests to average out the
              noise, but even so they appear to be less consistent between runs on some browsers.</p>
+          <a name="toovariable"></a>
+          <p>When we see the results of a test are too variable, we mark it with <b>"(±X%!)"</b> next to the score. The cause of such variability
+             might be something else on your machine (perhaps a background indexing service happend to use a CPU core during a test, etc.),
+             or it might be that the browser behaves unpredictably for some reason.</p>
         </div>
       </div>
 
