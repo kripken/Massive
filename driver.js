@@ -65,14 +65,14 @@ var jobs = [
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
-  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
+  makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
                           totalReps: 5, warmupReps: 0 }),
-  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 5, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
+  makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
                           totalReps: 6, warmupReps: 1 }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations',
-                          totalReps: 9, warmupReps: 0 }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['150', '5'], description: 'SQLite operations',
-                          totalReps: 10, warmupReps: 1 }),
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
+                          totalReps: 5, warmupReps: 0 }),
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
+                          totalReps: 6, warmupReps: 1 }),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
