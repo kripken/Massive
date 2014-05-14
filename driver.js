@@ -340,7 +340,7 @@ function run() {
                                '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
                                '  <td style="background-color:#ddd"></td>' +
                                '  <td style="background-color:#ddd"></td>' +
-                               '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a href="#explanations">details</a>)' : '') + '</td>' +
+                               '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a onclick="ensureFAQ()" href="#explanations">details</a>)' : '') + '</td>' +
                                //'  <td style="background-color:#ddd"></td>' +
                                '</tr>';
       flushTable();
@@ -401,7 +401,7 @@ function run() {
       job.msg = final;
       console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
-      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + (tooVariable ? ' <a href="#toovariable">(±' + Math.round(100*noise) + '%!)</a>' : '') + '</b>', 'background-color: #bbccff');
+      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + (tooVariable ? ' <a onclick="ensureFAQ()" href="#toovariable">(±' + Math.round(100*noise) + '%!)</a>' : '') + '</b>', 'background-color: #bbccff');
       flushTable();
       //document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
       //document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';

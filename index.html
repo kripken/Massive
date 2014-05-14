@@ -76,10 +76,10 @@
       </div>
 
 <script>
-function toggleFaq() {
+function toggleFAQ() {
   var button = document.getElementById('faq-button');
   var faq = document.getElementById('faq');
-  if (faq.style.display == 'none') {
+  if (faq.style.display === 'none') {
     faq.style.display = 'block';
     button.innerHTML = 'Hide';
   } else {
@@ -87,13 +87,17 @@ function toggleFaq() {
     button.innerHTML = 'Show';
   }
 }
+function ensureFAQ() {
+  if (document.getElementById('faq').style.display === 'none') toggleFAQ();
+}
+
 </script>
 
       <div class="row-fluid">
         <div class="span">
           <h3>
             FAQ
-            <button id="faq-button" type="button" class="btn" onclick="toggleFaq()">Show</button>
+            <button id="faq-button" type="button" class="btn" onclick="toggleFAQ()">Show</button>
           </h3>
         </div>
         <div id="faq" style="display: none">
