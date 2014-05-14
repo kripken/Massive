@@ -245,7 +245,7 @@ var jobs = [
     },
   },
 
-  { title: 'Variance', description: 'Runs many frames of a long-running simulation and tests variability and the worst case among them' },
+  { title: 'Variance', description: 'Runs many frames of a long-running simulation and tests variability' },
 
   {
     benchmark: 'box2d-variance',
