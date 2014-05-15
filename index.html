@@ -90,7 +90,6 @@ function toggleFAQ() {
 function ensureFAQ() {
   if (document.getElementById('faq').style.display === 'none') toggleFAQ();
 }
-
 </script>
 
       <div class="row-fluid">
@@ -146,6 +145,11 @@ function ensureFAQ() {
           <p>When we see the results of a test are too variable, we mark it with <b>"(±X%!)"</b> next to the score. The cause of such variability
              might be something else on your machine (perhaps a background indexing service happend to use a CPU core during a test, etc.),
              or it might be that the browser behaves unpredictably for some reason.</p>
+        </div>
+        <br>
+        <div class="span">
+          <center><button type="button" class="btn" onclick="flushTable(prompt('Paste the old results:'))">Enter and view data from another run</button></center>
+          <br>
         </div>
       </div>
 

@@ -297,6 +297,19 @@ function normalize(job) {
   return 10000 * job.normalized();
 }
 
+var tableBody = document.getElementById('table_body');
+var tableBodyLines = jobs.map(function(job) { return '<tr><td>' + (job.title ? '<b>' + job.title + '</b>' : job.benchmark) + '</td><td></td><td></td><td></td></tr>'; });
+
+function flushTable(data) {
+  if (data) {
+    document.getElementById('results_area').hidden = false;
+    tableBodyLines = [data];
+  }
+  tableBody.innerHTML = tableBodyLines.join('\n');
+}
+
+flushTable();
+
 var ran = false;
 function run() {
   if (ran) return;
@@ -304,13 +317,6 @@ function run() {
 
   document.getElementById('results_area').hidden = false;
   document.getElementById('warning').hidden = true;
-
-  var tableBody = document.getElementById('table_body');
-  var tableBodyLines = jobs.map(function(job) { return '<tr><td>' + (job.title ? '<b>' + job.title + '</b>' : job.benchmark) + '</td><td></td><td></td><td></td></tr>'; });
-  function flushTable() {
-    tableBody.innerHTML = tableBodyLines.join('\n');
-  }
-  flushTable();
 
   var theButton = document.getElementById('the_button');
   theButton.innerHTML = 'Running benchmarks... (this can take a while)';
