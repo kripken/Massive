@@ -290,7 +290,7 @@ var jobs = [
     normalized: function() {
       return 5/Math.max(5, this.calculate()); // less than 5ms is perfect
     },
-  },
+  }
 ];
 
 function normalize(job) {
@@ -339,6 +339,7 @@ function run() {
       theButton.innerHTML = 'Score: <strong>' + prettyInteger(finalCalculation()) + '</strong> (higher is better)';
       theButton.classList.remove('btn-warning');
       theButton.classList.add('btn-success');
+      document.getElementById('copy_results').hidden = false;
       return;
     }
     if (job.title) {

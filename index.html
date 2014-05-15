@@ -52,6 +52,9 @@
         <br>
         <p><a href="#" class="btn btn-primary btn-large " onclick="run(); return false" id="the_button">Run the benchmark now! &raquo;</a></p>
         <p id="warning"><small>(Benchmark will take a while to run, and some browsers may become less responsive for part of that time.)</small></p>
+        <div id="copy_results" hidden=1>
+          <center><button type="button" class="btn" onclick="alert(tableBody.innerHTML)">Copy results (so you can view them again later)</button></center>
+        </div>
         <p><center style="font-weight: bold; color: #b31">This benchmark is a work in progress - it is NOT ready yet. <a style="color: #510" href="https://github.com/kripken/Massive">Feedback</a> is welcome!</center></p>
       </div>
 
@@ -148,7 +151,7 @@ function ensureFAQ() {
         </div>
         <br>
         <div class="span">
-          <center><button type="button" class="btn" onclick="flushTable(prompt('Paste the old results:'))">Enter and view data from another run</button></center>
+          <center><button type="button" class="btn" onclick="flushTable(prompt('Paste the old results:'))">Enter data copied from another run</button></center>
           <br>
         </div>
       </div>
