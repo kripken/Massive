@@ -104,9 +104,19 @@ function ensureFAQ() {
         </div>
         <div id="faq" style="display: none">
           <h4>Why make a new benchmark?</h4>
-          <p>asm.js appears in one test in Octane, but otherwise is not present in the main JavaScript benchmarks. And asm.js
-             often appears as large source files, which can cause different performance characteristics than the typical
-             small programs appearing in most benchmarks. For those reasons, a new asm.js benchmark is useful.</p>
+          <p>asm.js appears in one test in <a href="https://developers.google.com/octane/">Octane</a>, and in several
+             tests in <a href="http://browserbench.org/JetStream/">JetStream</a>, which is great, but several aspects of asm.js performance are
+             not fully measured in those. In particular, asm.js
+             often appears as large (you might even say <b>massive</b>) source files, which can have different performance characteristics than the typical
+             small programs appearing in most benchmarks. For example, a very large codebase may contain very large functions,
+             which due to their size are difficult to optimize efficiently (either not fully optimized, or optimized slowly in a noticeable way),
+             or just the sheer number of functions may be very high and cause the browser to pause as the codebase is parsed and starts to execute.
+             Such very large codebases can therefore bring new challenges to JavaScript engines (or rather, more extreme versions of familiar challenges),
+             and it is important to measure performance on them because they are showing up with increasing frequency on the web (for example,
+             as native plugins are fading out, game engine companies like <a href="http://unity3d.com/">Unity</a> and
+             <a href="http://unrealengine.com/">Epic</a> are starting to compile their large codebases to asm.js).
+             For these reasons, the Massive benchmark includes several very large codebases (Poppler, Bullet, SQLite, etc.), and measures throughput as well as
+             responsiveness, variability and startup time (see details below).</p>
           <h4>How does this relate to the Emscripten benchmark suite - what does this offer over that?</h4>
           <p>The <a href="http://kripken.github.io/embenchen/">Emscripten benchmark suite</a> evolved over time in order
              to benchmark Emscripten itself, and therefore mainly focused on throughput, and is runnable in both shell and
