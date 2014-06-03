@@ -60,7 +60,6 @@ var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
 var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
 
 var jobs = [
-
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
@@ -310,6 +309,17 @@ function flushTable(data) {
 
 flushTable();
 
+var finalScore;
+
+function showFinalScore(score) {
+  finalScore = score;
+  var theButton = document.getElementById('the_button');
+  theButton.innerHTML = 'Score: <strong>' + score + '</strong> (higher is better)';
+  theButton.classList.remove('btn-warning');
+  theButton.classList.add('btn-success');
+  document.getElementById('copy_results').hidden = false;
+}
+
 var ran = false;
 function run() {
   if (ran) return;
@@ -336,10 +346,7 @@ function run() {
     var job = jobs[curr++];
     if (!job) {
       // All benchmarks complete!
-      theButton.innerHTML = 'Score: <strong>' + prettyInteger(finalCalculation()) + '</strong> (higher is better)';
-      theButton.classList.remove('btn-warning');
-      theButton.classList.add('btn-success');
-      document.getElementById('copy_results').hidden = false;
+      showFinalScore(prettyInteger(finalCalculation()));
       return;
     }
     if (job.title) {
@@ -443,5 +450,18 @@ function run() {
     doRep();
   }
   runJob();
+}
+
+// serialization
+
+function copyData() {
+  alert(finalScore + '|' + tableBody.innerHTML);
+}
+
+function pasteData() {
+  var data = prompt('Paste the old results:');
+  var split = data.split('|');
+  showFinalScore(split[0]);
+  flushTable(split[1]);
 }
 
