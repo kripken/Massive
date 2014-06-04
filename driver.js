@@ -325,6 +325,7 @@ function run() {
   if (ran) return;
   ran = true;
 
+  document.getElementById('blurb').hidden = true;
   document.getElementById('results_area').hidden = false;
   document.getElementById('warning').hidden = true;
 
