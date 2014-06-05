@@ -256,7 +256,7 @@ var jobs = [
 
   {
     benchmark: 'box2d-variance',
-    description: 'Box2D physics: frame time variance',
+    description: 'Box2D physics: frame variance',
     scale: MILLISECONDS,
     createWorker: function() {
       return {
@@ -278,7 +278,7 @@ var jobs = [
   },
   {
     benchmark: 'poppler-variance',
-    description: 'Poppler PDF performance: frame time variance',
+    description: 'Poppler PDF performance: frame variance',
     scale: MILLISECONDS,
     createWorker: function() {
       return {
