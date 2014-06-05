@@ -14,7 +14,8 @@ var SECONDS = 'seconds (lower is better)';
 var MILLISECONDS = 'milliseconds (lower is better)';
 var MFLOPS = 'MFLOPS (<b>higher</b> is better)';
 
-function makeMainThreadBenchmark(name, args) {
+function makeMainThreadBenchmark(name, args, before, after) {
+  var beforeRun = false
   return {
     benchmark: 'main-thread-' + name,
     description: 'Responsiveness during ' + args.description + ' on the main thread',
@@ -22,13 +23,16 @@ function makeMainThreadBenchmark(name, args) {
     totalReps: args.totalReps,
     warmupReps: args.warmupReps,
     createWorker: function() {
+      if (before && !beforeRun) {
+        beforeRun = true;
+        before();
+      }
       return {
         postMessage: function() {
           var worker = this;
           // create the iframe and set up communication
           var frame = document.createElement('iframe');
-          frame.width = document.body.clientWidth*0.6;
-          frame.height = document.body.clientHeight*0.2;
+          frame.id = 'responsiveness-frame';
           frame.src = 'responsiveness.html'
           window.onmessage = function(event) {
             document.getElementById('presentation-area').removeChild(frame);
@@ -41,7 +45,7 @@ function makeMainThreadBenchmark(name, args) {
           };
           document.getElementById('presentation-area').appendChild(frame);
         },
-        terminate: function(){},
+        terminate: after || function(){},
       };
     },
     calculate: function() {
@@ -52,6 +56,11 @@ function makeMainThreadBenchmark(name, args) {
       return (args.factor || 1/30)/this.calculate();
     },
   };
+}
+
+function togglePresentationArea() {
+  var area = document.getElementById('presentation-area');
+  area.style.display = area.style.display === 'block' ? 'none' : 'block';
 }
 
 var jobMap = {};
@@ -65,13 +74,13 @@ var jobs = [
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
   // build instructionses: see below
   makeMainThreadBenchmark('poppler-cold', { cold: true,  url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
-                          totalReps: 6, warmupReps: 0 }),
+                          totalReps: 6, warmupReps: 0 }, togglePresentationArea),
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
                           totalReps: 7, warmupReps: 1 }),
   makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
                           totalReps: 8, warmupReps: 0 }),
   makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
-                          totalReps: 9, warmupReps: 1 }),
+                          totalReps: 9, warmupReps: 1 }, null, togglePresentationArea),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
