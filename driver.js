@@ -15,7 +15,6 @@ var MILLISECONDS = 'milliseconds (lower is better)';
 var MFLOPS = 'MFLOPS (<b>higher</b> is better)';
 
 function makeMainThreadBenchmark(name, args, before, after) {
-  var beforeRun = false
   return {
     benchmark: 'main-thread-' + name,
     description: 'Responsiveness during ' + args.description + ' on the main thread',
@@ -23,9 +22,9 @@ function makeMainThreadBenchmark(name, args, before, after) {
     totalReps: args.totalReps,
     warmupReps: args.warmupReps,
     createWorker: function() {
-      if (before && !beforeRun) {
-        beforeRun = true;
+      if (before) {
         before();
+        before = null;
       }
       return {
         postMessage: function() {
