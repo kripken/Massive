@@ -87,7 +87,7 @@ var jobs = [
   // box2d. build instructions: let emscripten benchmark suite generate it for you (non-fround)
   {
     benchmark: 'box2d-throughput',
-    description: 'Box2D physics: average frame rate',
+    description: 'Box2D physics performance',
     scale: MILLISECONDS,
     args: ['3'],
     totalReps: 4, // more reps to stabilize variance, which is more variable
@@ -104,7 +104,7 @@ var jobs = [
   // box2d float32. build instructions: let emscripten benchmark suite generate it for you, with PRECISE_F32=2
   {
     benchmark: 'box2d-throughput-f32',
-    description: 'Box2D physics: average frame rate w/ Math.fround',
+    description: 'Box2D physics performance w/ Math.fround',
     scale: MILLISECONDS,
     args: ['3'],
     createWorker: function() {
@@ -257,7 +257,7 @@ var jobs = [
 
   {
     benchmark: 'box2d-variance',
-    description: 'Box2D physics: frame rate variance',
+    description: 'Box2D physics: frame time variance',
     scale: MILLISECONDS,
     createWorker: function() {
       return {
@@ -279,7 +279,7 @@ var jobs = [
   },
   {
     benchmark: 'poppler-variance',
-    description: 'Poppler PDF performance: frame rate variance',
+    description: 'Poppler PDF performance: frame time variance',
     scale: MILLISECONDS,
     createWorker: function() {
       return {
