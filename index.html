@@ -169,6 +169,24 @@ function ensureFAQ() {
           <p>When we see the results of a test are too variable, we mark it with <b>"(±X%!)"</b> next to the score. The cause of such variability
              might be something else on your machine (perhaps a background indexing service happend to use a CPU core during a test, etc.),
              or it might be that the browser behaves unpredictably for some reason.</p>
+          <h4>What code is being tested in these benchmarks?</h4>
+          <p>All the benchmarks here are from real-world C or C++ codebases:
+            <ul>
+              <li><b>Box2D</b>: A 2D physics engine, used in many games, for example Angry Birds. Stresses
+                                floating-point processing performance.</li>
+              <li><b>Lua</b>: A script language that is used in many games as well as on Wikipedia. Here the
+                              entire Lua VM is compiled down to JavaScript, including interpreter, garbage
+                              collector, etc.</li>
+              <li><b>Poppler</b>: A PDF rendering engine, used by many applications, for example LibreOffice.
+                                  Rendering PDFs requires many capabilities (font rendering, graphics, etc.),
+                                  making this the largest of the codebases tested here.</li>
+              <li><b>SQLite</b>: A complete transactional SQL database engine. Parsing and executing SQL
+                                 queries is done using a large interpreter-loop type function, which is
+                                 challenging to optimize.</li>
+            </ul>
+            All of these codebases are open source, so you can build and inspect them yourself (the build
+            tool, Emscripten, is of course open source as well).
+          </p>
         </div>
         <br>
         <div class="span">
