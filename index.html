@@ -173,16 +173,20 @@ function ensureFAQ() {
           <p>All the benchmarks here are from real-world C or C++ codebases:
             <ul>
               <li><b>Box2D</b>: A 2D physics engine, used in many games, for example Angry Birds. Stresses
-                                floating-point processing performance.</li>
+                                floating-point processing performance. The workload is based on
+                                <a href="https://github.com/joelgwebber/bench2d/">jgw's bench2D</a>. (~30KLOC)</li>
               <li><b>Lua</b>: A script language that is used in many games as well as on Wikipedia. Here the
                               entire Lua VM is compiled down to JavaScript, including interpreter, garbage
-                              collector, etc.</li>
+                              collector, etc. The workloads used are the scimark and binarytrees benchmarks. (~16KLOC)</li>
               <li><b>Poppler</b>: A PDF rendering engine, used by many applications, for example LibreOffice.
                                   Rendering PDFs requires many capabilities (font rendering, graphics, etc.),
-                                  making this the largest of the codebases tested here.</li>
+                                  making this the largest of the codebases tested here, especially since it is
+                                  built together with the FreeType font rendering library. The workload is
+                                  Lawrence Lessig's "Free Culture". (~250KLOC)</li>
               <li><b>SQLite</b>: A complete transactional SQL database engine. Parsing and executing SQL
                                  queries is done using a large interpreter-loop type function, which is
-                                 challenging to optimize.</li>
+                                 challenging to optimize. The workload is a set of table
+                                 inserts, selects, index creation, and selects with an index. (~128KLOC)</li>
             </ul>
             All of these codebases are open source, so you can build and inspect them yourself (the build
             tool, Emscripten, is of course open source as well).
