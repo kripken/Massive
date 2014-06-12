@@ -76,9 +76,9 @@ var jobs = [
                           totalReps: 6, warmupReps: 0 }, togglePresentationArea),
   makeMainThreadBenchmark('poppler-warm', { cold: false, url: 'poppler/poppler.js', data: POPPLER_DATA, prints: 1, arguments: POPPLER_ARGS, description: 'Poppler PDF rendering',
                           totalReps: 7, warmupReps: 1 }),
-  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
+  makeMainThreadBenchmark('sqlite-cold', { cold: true,  url: 'sqlite/sqlite.js', prints: 12, arguments: ['--size', '0'], description: 'SQLite operations',
                           totalReps: 8, warmupReps: 0 }),
-  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['5', '2'], description: 'SQLite operations',
+  makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['--size', '0'], description: 'SQLite operations',
                           totalReps: 9, warmupReps: 1 }, null, togglePresentationArea),
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
@@ -165,13 +165,12 @@ var jobs = [
       return (7/this.calculate());
     },
   },
-
-  // sqlite. build instructions: run asm3.test_sqlite in emscripten test suite with OUTLINING_LIMIT 60000
+  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60000000 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1
   {
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
     scale: SECONDS,
-    args: ['15000', '10'],
+    args: ['--size', '19'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js')
     },
@@ -449,7 +448,7 @@ function run() {
           setTimeout(doRep, 1);
         }
       };
-      console.log('requesting benchmark ' + job.benchmark);
+      console.log('requesting benchmark ' + job.benchmark + ' ' + job.args);
       worker.postMessage({
         benchmark: job.benchmark,
         args: job.args
