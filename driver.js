@@ -440,9 +440,10 @@ function run() {
         if (msg.benchmark != job.benchmark) throw 'invalid data from benchmark worker';
         results.push(msg);
 
+        worker.terminate(); // ensure the worker is cleaned up before the next starts
+
         reps++;
         if (reps === totalReps) {
-          worker.terminate(); // ensure the worker is cleaned up before the next starts
           finish();
         } else {
           setTimeout(doRep, 1);
