@@ -300,7 +300,9 @@ var jobs = [
 ];
 
 function normalize(job) {
-  return 10000 * job.normalized();
+  var ret = 10000 * job.normalized();
+  if (isNaN(ret)) throw 'invalid data for ' + job.benchmark;
+  return ret;
 }
 
 var tableBody = document.getElementById('table_body');
