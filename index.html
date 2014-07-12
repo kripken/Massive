@@ -55,7 +55,7 @@
 
       <div class="hero-unit">
         <h1 style="color: #555">MASSIVE - the <span style="color: #000">asm.js</span> benchmark</h1>
-        <h4>v0.0.4</h4>
+        <h4>v0.1 (beta)</h4>
         <div id="blurb">
           <br>
           <p>Massive is a JavaScript benchmark that focuses on large, real-world C++ codebases compiled into <a href="http://asmjs.org">asm.js</a> using <a href="http://emscripten.org">Emscripten</a>. This is just one pattern of JavaScript among many on the web, but is very important for things like games, and unique in that the generated JavaScript is often very large (much larger than typical JavaScript benchmarks), which is the motivation for a new benchmark.</p>
@@ -186,10 +186,10 @@ function ensureFAQ() {
               <li><b>SQLite</b>: A complete transactional SQL database engine. Parsing and executing SQL
                                  queries is done using a large interpreter-loop type function, which is
                                  challenging to optimize. The workload is the SQLite speedtest1.c benchmark,
-                                 which SQLite constructed to represent real-world usage patterns. (~128KLOC)</li>
+                                 which SQLite devs constructed to represent real-world usage patterns. (~128KLOC)</li>
             </ul>
             All of these codebases are open source, so you can build and inspect them yourself (the build
-            tool, Emscripten, is of course open source as well).
+            tool, <a href="http://emscripten.org">Emscripten</a>, is of course open source as well).
           </p>
         </div>
         <br>
