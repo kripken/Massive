@@ -191,6 +191,15 @@ function ensureFAQ() {
             All of these codebases are open source, so you can build and inspect them yourself (the build
             tool, <a href="http://emscripten.org">Emscripten</a>, is of course open source as well).
           </p>
+          <h4>How long does Massive take to run?</h4>
+          <p>Generally quite a while, as it is designed to execute fixed workloads of sufficient length to
+             measure real-world performance on large applications. How long it takes will depend on the machine and
+             browser, of course, but you can probably expect it to take at least a few minutes (on a desktop or laptop
+             machine; a mobile device may take much more). Massive should not lock up your
+             browser as it runs, however - except for the Main Thread Responsiveness tests, which run first, benchmarks
+             are run in web workers (and even the Main Thread Responsiveness tests should not reduce responsiveness
+             very much). Note that results of individual benchmarks show up when ready, so you can view those
+             before all of Massive is complete.</p>
         </div>
         <br>
         <div class="span">
