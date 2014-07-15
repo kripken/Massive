@@ -152,7 +152,7 @@ function ensureFAQ() {
              tests that aspect). "Preparation" is basically all the time before code is actually able to run; that may include
              parsing, conversion to bitcode, JIT compilation, etc., depending on the JS engine.</p>
           <p><b>Variance</b> measures how variable the frame rate is in an application that needs to run in each frame
-             (this is important in things like games, which much finish all they need every 1/60 of a second, in order to be
+             (this is important in things like games, which must finish all they need every 1/60 of a second, in order to be
              smooth). Specifically, we run many frames and then calculate the statistical variance and worst case. Note that
              one VM might have a much faster overall frame rate than another, but also more variance: in general, given two
              VMs with the same average, the one with less variance is "better" since it's smoother. But given a different mean,
