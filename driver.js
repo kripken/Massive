@@ -466,7 +466,13 @@ function run() {
 // serialization
 
 function copyData() {
-  alert(finalScore + '|' + tableBody.innerHTML);
+  function fixUp(text) {
+    text = text.replace(/&/g, "&amp;");
+    text = text.replace(/</g, "&lt;");
+    text = text.replace(/>/g, "&gt;");
+    return text;
+  }
+  document.getElementById('copy_results').innerHTML = '<hr><h3>Copy this:</h3><code><pre>' + fixUp(finalScore + '|' + tableBody.innerHTML) + '</pre></code><hr>';
 }
 
 function pasteData() {
