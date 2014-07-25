@@ -329,6 +329,12 @@ function showFinalScore(score) {
   document.getElementById('copy_results').hidden = false;
 }
 
+if (window.location.search) {
+  var benches = window.location.search.substr(1).replace(/\//g, '').split(',');
+  jobs = jobs.filter(function(job) { return benches.indexOf(job.benchmark) >= 0 });
+  if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
+}
+
 var ran = false;
 function run() {
   if (ran) return;
@@ -352,7 +358,6 @@ function run() {
   var curr = 0;
 
   function runJob() {
-
     var job = jobs[curr++];
     if (!job) {
       // All benchmarks complete!
