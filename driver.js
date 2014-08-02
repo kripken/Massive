@@ -1,7 +1,6 @@
 
 function prettyInteger(x) {
   x = '' + Math.round(x);
-  var chars = x.split('');
   var ret = '';
   for (var i = 0; i < x.length; i++) {
     if (i > 0 && i % 3 === 0) ret = ',' + ret;
@@ -32,7 +31,7 @@ function makeMainThreadBenchmark(name, args, before, after) {
           // create the iframe and set up communication
           var frame = document.createElement('iframe');
           frame.id = 'responsiveness-frame';
-          frame.src = 'responsiveness.html'
+          frame.src = 'responsiveness.html';
           window.onmessage = function(event) {
             document.getElementById('presentation-area').removeChild(frame);
             window.onmessage = null;
@@ -91,7 +90,7 @@ var jobs = [
     args: ['3'],
     totalReps: 4, // more reps to stabilize variance, which is more variable
     createWorker: function() {
-      return new Worker('box2d/benchmark-worker.js')
+      return new Worker('box2d/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.average;
@@ -107,7 +106,7 @@ var jobs = [
     scale: MILLISECONDS,
     args: ['3'],
     createWorker: function() {
-      return new Worker('box2d/benchmark-worker.js')
+      return new Worker('box2d/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.average;
@@ -124,7 +123,7 @@ var jobs = [
     scale: SECONDS,
     args: ['binarytrees.lua'],
     createWorker: function() {
-      return new Worker('lua/benchmark-worker.js')
+      return new Worker('lua/benchmark-worker.js');
     },
     calculate: function() {
       return Math.max(1/30, this.msg.runtime/1000);
@@ -139,7 +138,7 @@ var jobs = [
     scale: MFLOPS,
     args: ['scimark.lua'],
     createWorker: function() {
-      return new Worker('lua/benchmark-worker.js')
+      return new Worker('lua/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.scimarkTime;
@@ -172,7 +171,7 @@ var jobs = [
     scale: SECONDS,
     args: ['--size', '19'],
     createWorker: function() {
-      return new Worker('sqlite/benchmark-worker.js')
+      return new Worker('sqlite/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.calcTime;
@@ -191,7 +190,7 @@ var jobs = [
     args: ['startup'],
     totalReps: 4,
     createWorker: function() {
-      return new Worker('poppler/benchmark-worker.js')
+      return new Worker('poppler/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.startup/1000;
@@ -208,7 +207,7 @@ var jobs = [
     totalReps: 5,
     warmupReps: 1,
     createWorker: function() {
-      return new Worker('poppler/benchmark-worker.js')
+      return new Worker('poppler/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.startup/1000;
@@ -224,7 +223,7 @@ var jobs = [
     args: ['startup', 'cold'],
     totalReps: 6,
     createWorker: function() {
-      return new Worker('sqlite/benchmark-worker.js')
+      return new Worker('sqlite/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.runtime/1000;
@@ -241,7 +240,7 @@ var jobs = [
     totalReps: 7,
     warmupReps: 1,
     createWorker: function() {
-      return new Worker('sqlite/benchmark-worker.js')
+      return new Worker('sqlite/benchmark-worker.js');
     },
     calculate: function() {
       return this.msg.runtime/1000;
@@ -322,16 +321,15 @@ var finalScore;
 
 function showFinalScore(score) {
   finalScore = score;
-  var theButton = document.getElementById('the_button');
-  theButton.innerHTML = 'Score: <strong>' + score + '</strong> (higher is better)';
-  theButton.classList.remove('btn-warning');
-  theButton.classList.add('btn-success');
+  btnRun.innerHTML = 'Score: <strong>' + score + '</strong> (higher is better)';
+  btnRun.classList.remove('btn-warning');
+  btnRun.classList.add('btn-success');
   document.getElementById('copy_results').hidden = false;
 }
 
 if (window.location.search) {
   var benches = window.location.search.substr(1).replace(/\//g, '').split(',');
-  jobs = jobs.filter(function(job) { return benches.indexOf(job.benchmark) >= 0 });
+  jobs = jobs.filter(function(job) { return benches.indexOf(job.benchmark) >= 0; });
   if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
 }
 
@@ -344,15 +342,14 @@ function run() {
   document.getElementById('results_area').hidden = false;
   document.getElementById('warning').hidden = true;
 
-  var theButton = document.getElementById('the_button');
-  theButton.innerHTML = 'Running benchmarks... (this can take a while)';
-  theButton.classList.remove('btn-primary');
-  theButton.classList.add('btn-warning');
+  btnRun.innerHTML = 'Running benchmarks... (this can take a while)';
+  btnRun.classList.remove('btn-primary');
+  btnRun.classList.add('btn-warning');
 
   function finalCalculation() {
     // normalize based on experimental data
-    var normalized = jobs.filter(function(job) { return job.normalized }).map(function(job) { return normalize(job) });
-    return normalized.map(function(x) { return Math.pow(x, 1/normalized.length) }).reduce(function(x, y) { return x * y }, 1)
+    var normalized = jobs.filter(function(job) { return job.normalized; }).map(function(job) { return normalize(job); });
+    return normalized.map(function(x) { return Math.pow(x, 1/normalized.length); }).reduce(function(x, y) { return x * y; }, 1);
   }
 
   var curr = 0;
@@ -388,7 +385,7 @@ function run() {
                                //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
                                '</tr>';
     }
-    emitBenchmarkLine('<b>(..running..)</b>', 'background-color: #ffddaa');
+    emitBenchmarkLine('<b>running&hellip;</b>', 'background-color: #fda');
     flushTable();
 
     // Run the job the specified number of times
@@ -399,10 +396,10 @@ function run() {
 
     function finish() {
       console.log('final: ' + JSON.stringify(results));
-      var final = {}, sum = 0, squares = 0;
-      for (var i = warmupReps; i < totalReps; i++) {
+      var final = {}, i, k, sum = 0, squares = 0;
+      for (i = warmupReps; i < totalReps; i++) {
         var result = results[i];
-        for (var k in result) {
+        for (k in result) {
           if (typeof result[k] === 'number') {
             final[k] = (final[k] || 0) + result[k];
           }
@@ -422,7 +419,7 @@ function run() {
       var tooVariable = noise > 0.2;
 
       // calculate final score
-      for (var k in final) {
+      for (k in final) {
         if (typeof final[k] === 'number') {
           final[k] /= totalReps - warmupReps;
         }
@@ -472,10 +469,11 @@ function run() {
 
 function copyData() {
   function fixUp(text) {
-    text = text.replace(/&/g, "&amp;");
-    text = text.replace(/</g, "&lt;");
-    text = text.replace(/>/g, "&gt;");
-    return text;
+    return text.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/'/g, '&#39;')
+      .replace(/"/g, '&#34;');
   }
   document.getElementById('copy_results').innerHTML = '<hr><h3>Copy this:</h3><code><pre>' + fixUp(finalScore + '|' + tableBody.innerHTML) + '</pre></code><hr>';
 }
@@ -487,3 +485,17 @@ function pasteData() {
   flushTable(split[1]);
 }
 
+function _pd(func) {
+  return function(e) {
+    e.preventDefault();
+    func.apply(this, arguments);
+  };
+}
+
+var btnCopy = document.getElementById('btn-copy');
+var btnRun = document.getElementById('btn-run');
+var btnPaste = document.getElementById('btn-paste');
+
+btnCopy.addEventListener('click', _pd(copyData), false);
+btnRun.addEventListener('click', _pd(run), false);
+btnPaste.addEventListener('click', _pd(pasteData), false);

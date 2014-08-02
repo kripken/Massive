@@ -62,10 +62,10 @@
           <p>Massive is a JavaScript benchmark that focuses on large, real-world C++ codebases compiled into <a href="http://asmjs.org">asm.js</a> using <a href="http://emscripten.org">Emscripten</a>. This is just one pattern of JavaScript among many on the web, but is very important for things like games, and unique in that the generated JavaScript is often very large (much larger than typical JavaScript benchmarks), which is the motivation for a new benchmark.</p>
           <br>
         </div>
-        <p><a href="#" class="btn btn-primary btn-large " onclick="run(); return false" id="the_button">Run the benchmark now! &raquo;</a></p>
+        <p><a href="#" class="btn btn-primary btn-large btn-run" id="btn-run">Run the benchmark now! &raquo;</a></p>
         <p id="warning"><small>(Benchmark will take a while to run, and some browsers may become less responsive for part of that time.)</small></p>
         <div id="copy_results" hidden=1>
-          <center><button type="button" class="btn" onclick="copyData()">Copy results (so you can view them again later)</button></center>
+          <center><button type="button" class="btn btn-copy" id="btn-copy">Copy results (so you can view them again later)</button></center>
         </div>
         <p><center style="font-weight: bold; color: #b31">This benchmark is a work in progress - it is NOT ready yet. <a style="color: #510" href="https://github.com/kripken/Massive/issues">Feedback</a> is welcome!</center></p>
       </div>
@@ -209,7 +209,7 @@ function ensureFAQ() {
         </div>
         <br>
         <div class="span">
-          <center><button type="button" class="btn" onclick="pasteData()">Enter data copied from another run</button></center>
+          <center><button type="button" class="btn btn-paste" id="btn-paste">Enter data copied from another run</button></center>
           <br>
         </div>
       </div>
