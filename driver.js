@@ -327,9 +327,35 @@ function showFinalScore(score) {
   document.getElementById('copy_results').hidden = false;
 }
 
+// Send final results to a URL. Use something like this:
+// http://localhost:8000/index.html?sendToURL=http://localhost:8000/waka
+// This will send a GET request of http://localhost:8000/waka?2737.8507871321012
+
+var sendToURL = null;
+
+// Pick which benchmarks to run by adding them to the search part of the URL, comma separated
+
 if (window.location.search) {
-  var benches = window.location.search.substr(1).replace(/\//g, '').split(',');
-  jobs = jobs.filter(function(job) { return benches.indexOf(job.benchmark) >= 0; });
+  var parts = window.location.search.substr(1).split(',');
+  parts = parts.filter(function(part) {
+    var slices = part.split('=');
+    if (slices.length === 2) {
+      if (slices[0] === 'sendToURL') {
+        sendToURL = slices[1];
+        console.log('will send to ' + sendToURL);
+      } else {
+        console.log('weird url part ' + part);
+      }
+      return false;
+    }
+    if (slices.length === 1) {
+      return true; // assumed to be a job
+    } else {
+      console.log('peculiar url part ' + part);
+      return false;
+    }
+  });
+  jobs = jobs.filter(function(job) { return parts.indexOf(job.benchmark) >= 0; });
   if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
 }
 
@@ -358,7 +384,13 @@ function run() {
     var job = jobs[curr++];
     if (!job) {
       // All benchmarks complete!
-      showFinalScore(prettyInteger(finalCalculation()));
+      var finalResult = finalCalculation();
+      showFinalScore(prettyInteger(finalResult));
+      if (sendToURL) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', sendToURL + '?' + finalResult);
+        xhr.send();
+      }
       return;
     }
     if (job.title) {
@@ -499,3 +531,4 @@ var btnPaste = document.getElementById('btn-paste');
 btnCopy.addEventListener('click', _pd(copyData), false);
 btnRun.addEventListener('click', _pd(run), false);
 btnPaste.addEventListener('click', _pd(pasteData), false);
+
