@@ -374,7 +374,9 @@ function run() {
 
   function finalCalculation() {
     // normalize based on experimental data
-    var normalized = jobs.filter(function(job) { return job.normalized; }).map(function(job) { return normalize(job); });
+    var normalized = jobs.filter(function(job) { return job.normalized; });
+    console.log('normalized scores: ' + JSON.stringify(normalized.map(function(job) { return [job.benchmark, normalize(job)] })));
+    normalized = normalized.map(function(job) { return normalize(job); });
     return normalized.map(function(x) { return Math.pow(x, 1/normalized.length); }).reduce(function(x, y) { return x * y; }, 1);
   }
 
