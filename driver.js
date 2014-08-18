@@ -47,11 +47,14 @@ function makeMainThreadBenchmark(name, args, before, after) {
       };
     },
     calculate: function() {
-      // care about main thread pauses
-      return Math.max(1/30, this.msg.mainThread/1000);
+      // Care about main thread pauses accumulated over several main loop iterations
+      // Give the full score to 0.1 seconds and below, to decrease the effect of DOM
+      // noise on good (close to 0) results (a 0.1 second total pause when starting
+      // up a very large codebase is quite reasonable, too).
+      return Math.max(1/10, this.msg.mainThread/1000);
     },
     normalized: function() {
-      return (args.factor || 1/30)/this.calculate();
+      return (1/10)/this.calculate();
     },
   };
 }
