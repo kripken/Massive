@@ -330,11 +330,16 @@ function showFinalScore(score) {
   document.getElementById('copy_results').hidden = false;
 }
 
-// Send final results to a URL. Use something like this:
-// http://localhost:8000/index.html?sendToURL=http://localhost:8000/waka
-// This will send a GET request of http://localhost:8000/waka?2737.8507871321012
+// If set, start benchmarks automatically
+var autoRun = false;
 
-var sendToURL = null;
+// Post final results to a URL. Use something like this:
+// http://localhost:8000/index.html?postToURL=/results
+// This will send a POST request to http://localhost:8000/results with a
+// JSON structure containing individual benchmark results as well as the
+// final score.
+
+var postToURL = null;
 
 // Pick which benchmarks to run by adding them to the search part of the URL, comma separated
 
@@ -343,9 +348,11 @@ if (window.location.search) {
   parts = parts.filter(function(part) {
     var slices = part.split('=');
     if (slices.length === 2) {
-      if (slices[0] === 'sendToURL') {
-        sendToURL = slices[1];
-        console.log('will send to ' + sendToURL);
+      if (slices[0] === 'autoRun') {
+        autoRun = slices[1].toLowerCase() === 'true';
+      } else if (slices[0] === 'postToURL') {
+        postToURL = slices[1];
+        console.log('will post to ' + postToURL);
       } else {
         console.log('weird url part ' + part);
       }
@@ -358,8 +365,10 @@ if (window.location.search) {
       return false;
     }
   });
-  jobs = jobs.filter(function(job) { return parts.indexOf(job.benchmark) >= 0; });
-  if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
+  if (parts.length > 0) {
+    jobs = jobs.filter(function(job) { return parts.indexOf(job.benchmark) >= 0; });
+    if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
+  }
 }
 
 var ran = false;
@@ -391,10 +400,21 @@ function run() {
       // All benchmarks complete!
       var finalResult = finalCalculation();
       showFinalScore(prettyInteger(finalResult));
-      if (sendToURL) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', sendToURL + '?' + finalResult);
-        xhr.send();
+      if (postToURL) {
+        results = [];
+        for (i = 0; i < jobs.length; ++i) {
+          job = jobs[i];
+          if ('calculate' in job) {
+            results.push({'benchmark': job.benchmark,
+                          'result': job.calculate().toFixed(3)});
+          }
+        }
+        results.push({'benchmark': 'score', 'result': finalResult});
+
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open('POST', postToURL, true);
+        xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xmlHttp.send('results=' + JSON.stringify(results));
       }
       return;
     }
@@ -537,3 +557,4 @@ btnCopy.addEventListener('click', _pd(copyData), false);
 btnRun.addEventListener('click', _pd(run), false);
 btnPaste.addEventListener('click', _pd(pasteData), false);
 
+document.addEventListener('DOMContentLoaded', function() { if (autoRun) run(); }, false);
