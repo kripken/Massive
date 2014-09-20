@@ -1,0 +1,377 @@
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+a:not([href]) {
+  cursor: pointer;
+}
+
+.hideme {
+  text-indent: -9999px;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: #fff;
+  color: #333;
+  font: 16px "Source Sans Pro", sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 100%;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h2 {
+  color: #111;
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+h3 {
+  color: darkcyan;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.prose {
+  line-height: 1.5;
+}
+
+.prose h2,
+.prose h3,
+.prose p {
+  margin: 20px 0;
+}
+
+.prose h2:first-child,
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose ul {
+  margin: 0 0 20px 40px;
+}
+
+.prose li + li {
+  margin-top: 15px;
+}
+
+p + p {
+  margin-top: 20px;
+}
+
+a {
+  text-decoration: none;
+  transition: border-bottom .05s ease-in-out, color .05s ease-in-out;
+}
+
+.prose a {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2px;
+}
+
+.prose a:link {
+  color: #07d;
+}
+
+.prose a:active {
+  border-bottom-color: #fed;
+  color: #f81;
+}
+
+.prose a:hover {
+  border-bottom-color: #9cf;
+  color: #0ae;
+}
+
+.prose a:visited {
+  color: #95b;
+}
+
+@media (max-width: 320px) {
+  body {
+    padding: 0;
+  }
+}
+
+.flex {
+  /* Vertically centre with old flexbox */
+  display: -webkit-box;   /* iOS 6-, Safari 3.1-6 */
+  display: -moz-box;      /* Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;   /* IE 10 */
+  display: -webkit-flex;  /* Chrome */
+  display: flex;          /* Opera 12.1, Firefox 20+ */
+}
+
+.vcentre {
+  /* Vertically centre with old flexbox */
+  -webkit-align-items: center;
+  -moz-box-align: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+
+  /* Vertically centre with new flexbox */
+  align-items: center;
+}
+
+.header {
+  background: #fff;
+  box-shadow: 0 3px 13px 0 rgba(2,3,3,.15);
+  /*background: #4481e3;*/
+  height: 80px;
+
+  position: fixed;
+  top: 0;
+  z-index: 1;
+  left: 0;
+  right: 0;
+}
+
+.header + * {
+  margin-top: 80px;
+}
+
+nav {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: stretch;
+  align-items: stretch;
+}
+
+nav a {
+  border: 0;
+  color: #999;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 20px;
+}
+
+nav a:last-child {
+  padding-right: 0;
+}
+
+nav a:hover {
+  color: #2b8;
+}
+
+[data-hash="#benchmarks"] a[href="#benchmarks"],
+[data-hash="#faq"] a[href="#faq"],
+[data-hash="#resources"] a[href="#resources"] {
+  color: #286;
+  font-weight: 600;
+}
+
+a.logo {
+  /*background: yellow;*/
+  border: 0;
+  color: #222;
+  flex: 1;
+
+  padding: 15px 0 15px 50px;
+
+  flex-direction: column;
+  justify-content: space-between;
+  align-content: stretch;
+  align-items: stretch;
+
+  position: relative;
+}
+
+a.logo:before {
+  background: url(../img/logo.png) no-repeat;
+  background-size: contain;
+  content: "";
+  left: 0;
+  min-height: 50px;
+  position: absolute;
+  width: 50px;
+}
+
+.mozilla {
+  background: url(../img/mozilla.svg) no-repeat;
+  background-size: contain;
+  display: block;
+  height: 12px;
+  width: 60px;
+}
+
+.massive {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 28px;
+  padding-top: 2px;
+  position: relative;
+  left: -2px;
+}
+
+.slogan {
+  color: #666;
+  display: block;
+  font-size: 10px;
+  font-style: normal;
+  padding-top: 6px;
+}
+
+masthead {
+  background: #8ba;
+  color: #fff;
+  display: block;
+}
+
+masthead a {
+  color: #6ff;
+  text-decoration: underline;
+}
+
+masthead a:hover {
+  color: #cff;
+}
+
+.masthead-intro .wrap {
+  background-position: 100% 50%;
+  background-image: url(../img/logo.png);
+  background-size: auto 90px;
+}
+
+.wrap {
+  /*background: orange;*/
+  background-repeat: no-repeat;
+  font-weight: 300;
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 80%;
+}
+
+.wrap-juicy {
+  padding: 30px 0;
+}
+
+.wrap-centre {
+  text-align: center;
+}
+
+.wrap-dark p {
+  color: #eee;
+}
+
+.wrap-light p {
+  color: #999;
+}
+
+input, button, textarea {
+  font-family: inherit;
+}
+
+.btn {
+  background: #40dfc2;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.1);
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font: 400 14px/24px "Source Sans Pro", sans-serif;
+  min-width: 80px;
+  padding: 2px 15px;
+  text-align: center;
+}
+.btn:hover {
+  background: #1ba088;
+}
+.btn.disabled,
+.btn[disabled] {
+  background: #9b9b9b;
+  cursor: not-allowed;
+}
+.btn.disabled:hover,
+.btn[disabled]:hover {
+  background: #656565;
+}
+.btn-cta {
+  font-size: 18px;
+  line-height: 28px;
+  min-width: 200px;
+  padding: 10px 15px;
+}
+.btn:hover {
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.35);
+  text-decoration: none;
+}
+.btn:focus {
+  box-shadow: 0 0 10px rgba(55,55,55,.75) inset;
+  color: rgba(255,255,255,.75);
+}
+.btn-small {
+  font-size: 10px;
+}
+.btn-medium {
+  font-size: 14px;
+  line-height: 1.85;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.btn.btn-round {
+  border-radius: 20px;
+}
+
+/* Active */
+.btn-cta:active {
+  background:red;
+}
+
+.btn:active,
+.btn-active,
+.btn-active:hover {
+  background: #ddd;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4) inset;
+  color: #555;
+  filter: none;
+  text-shadow: 0 1px 0 rgba(255,255,255,.8);
+}
+
+/* Full */
+.btn-full {
+  width: 100%;
+}
+.btn-inline {
+  display: inline-block;
+}
+
+.benchmarks,
+.faq,
+.resources {
+  margin-top: -80px;
+  padding-top: 80px;
+}
+
+.benchmarks {
+}
+
+.faq {
+  background: #fff5d7;
+  background-clip: content-box;
+}
+
+.resources {
+  background: #fdd;
+  background-clip: content-box;
+}
+
+.footer {
+  background: #eee;
+}
