@@ -1,17 +1,43 @@
+(function () {
+
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function $$(selector) {
+  return Array.prototype.slice.call(document.querySelectorAll(selector));
+}
+
+function escape_(str) {
+  if (typeof str === 'undefined') {
+    return;
+  }
+  return str.replace(/&/g, '&amp;')
+            .replace(/>/g, '&gt;')
+            .replace(/</g, '&lt;')
+            .replace(/'/g, '&#39;')
+            .replace(/"/g, '&#34;');
+}
 
 function prettyInteger(x) {
   x = '' + Math.round(x);
   var ret = '';
   for (var i = 0; i < x.length; i++) {
     if (i > 0 && i % 3 === 0) ret = ',' + ret;
-    ret = x[x.length-1-i] + ret;
+    ret = x[x.length - 1 - i] + ret;
   }
   return ret;
 }
 
-var SECONDS = 'seconds (lower is better)';
-var MILLISECONDS = 'milliseconds (lower is better)';
-var MFLOPS = 'MFLOPS (<b>higher</b> is better)';
+function normalize(job) {
+  var ret = 10000 * job.normalized();
+  if (isNaN(ret)) throw 'invalid data for ' + job.benchmark;
+  return ret;
+}
+
+var SECONDS = 'seconds <small>(lower is better)</small>';
+var MILLISECONDS = 'milliseconds <small>(lower is better)</small>';
+var MFLOPS = 'MFLOPS <small>(<b>higher</b> is better)</small>';
 
 function makeMainThreadBenchmark(name, args, before, after) {
   return {
@@ -33,7 +59,7 @@ function makeMainThreadBenchmark(name, args, before, after) {
           frame.id = 'responsiveness-frame';
           frame.src = 'responsiveness.html';
           window.onmessage = function(event) {
-            document.getElementById('presentation-area').removeChild(frame);
+            area.removeChild(frame);
             window.onmessage = null;
             event.data.benchmark = 'main-thread-' + name;
             worker.onmessage(event);
@@ -41,7 +67,7 @@ function makeMainThreadBenchmark(name, args, before, after) {
           frame.onload = function() {
             frame.contentWindow.postMessage(args, '*');
           };
-          document.getElementById('presentation-area').appendChild(frame);
+          area.appendChild(frame);
         },
         terminate: after || function(){},
       };
@@ -54,14 +80,13 @@ function makeMainThreadBenchmark(name, args, before, after) {
       // Give the full score to 0.1 seconds and below, to decrease the effect of DOM
       // noise on good (close to 0) results (a 0.1 second total pause when starting
       // up a very large codebase is quite reasonable, too).
-      return (1/10)/Math.max(1/10, this.calculate());
+      return (1 / 10) / Math.max(1 / 10, this.calculate());
     },
   };
 }
 
 function togglePresentationArea() {
-  var area = document.getElementById('presentation-area');
-  area.style.display = area.style.display === 'block' ? 'none' : 'block';
+  // area.classList.toggle('visible');
 }
 
 var jobMap = {};
@@ -301,18 +326,41 @@ var jobs = [
   }
 ];
 
-function normalize(job) {
-  var ret = 10000 * job.normalized();
-  if (isNaN(ret)) throw 'invalid data for ' + job.benchmark;
-  return ret;
-}
+jobs = jobs.map(function (job) {
+  if (job.description) {
+    job.description += ' (<a href="#faq-explanations">details</a>)';
+  } else {
+    job.description = '';
+  }
 
-var tableBody = document.getElementById('table_body');
-var tableBodyLines = jobs.map(function(job) { return '<tr><td>' + (job.title ? '<b>' + job.title + '</b>' : job.benchmark) + '</td><td></td><td></td><td></td></tr>'; });
+  return job;
+});
+
+var tableBody = $('#table-body');
+var tableBodyLines = jobs.map(function (job) {
+  if (job.title) {
+    return (
+      '<tr class="row-pending row-group" title="' + job.title + '">\n' +
+      '  <td class="cell-group-title">' + job.title + '</td>\n' +
+      '  <td colspan="2"></td>\n' +
+      '  <td class="cell-description">' + job.description + '</td>\n' +
+      '</tr>\n'
+    );
+  } else {
+    return (
+      '<tr class="row-pending row-test">\n' +
+      '  <td title="' + job.benchmark + '">' + job.benchmark + '</td>\n' +
+      '  <td></td>\n' +
+      '  <td class="cell-scale">' + job.scale + '</td>\n' +
+      '  <td class="cell-description">' + job.description + '</td>\n' +
+      '</tr>\n'
+    );
+  }
+});
 
 function flushTable(data) {
   if (data) {
-    document.getElementById('results_area').hidden = false;
+    resultsArea.classList.remove('hidden');
     tableBodyLines = [data];
   }
   tableBody.innerHTML = tableBodyLines.join('\n');
@@ -327,7 +375,8 @@ function showFinalScore(score) {
   btnRun.innerHTML = 'Score: <strong>' + score + '</strong> (higher is better)';
   btnRun.classList.remove('btn-warning');
   btnRun.classList.add('btn-success');
-  document.getElementById('copy_results').hidden = false;
+  copyResults.classList.remove('hidden');
+  document.body.removeAttribute('data-running');
 }
 
 // If set, start benchmarks automatically
@@ -366,30 +415,46 @@ if (window.location.search) {
     }
   });
   if (parts.length > 0) {
-    jobs = jobs.filter(function(job) { return parts.indexOf(job.benchmark) >= 0; });
-    if (jobs.length === 0) alert('all jobs filtered by your list (index.html?job1,job2,job3 syntax was assumed, and we saw the url end in "' + window.location.search + '"), this seems wrong :(');
+    jobs = jobs.filter(function (job) {
+      return parts.indexOf(job.benchmark) >= 0;
+    });
+    if (jobs.length === 0) {
+      window.alert('all jobs filtered by your list ' +
+        '(index.html?job1,job2,job3 syntax was assumed, and we saw the url ' +
+        'end in "' + window.location.search + '"), this seems wrong :(');
+    }
   }
 }
 
 var ran = false;
+
 function run() {
   if (ran) return;
   ran = true;
 
-  document.getElementById('blurb').hidden = true;
-  document.getElementById('results_area').hidden = false;
-  document.getElementById('warning').hidden = true;
+  document.body.setAttribute('data-running', '');
+
+  aboveResultsArea.scrollIntoView(true);
+
+  resultsArea.classList.remove('hidden');
 
   btnRun.innerHTML = 'Running benchmarks... (this can take a while)';
   btnRun.classList.remove('btn-primary');
   btnRun.classList.add('btn-warning');
 
   function finalCalculation() {
-    // normalize based on experimental data
+    // Normalize based on experimental data.
     var normalized = jobs.filter(function(job) { return job.normalized; });
-    console.log('normalized scores: ' + JSON.stringify(normalized.map(function(job) { return [job.benchmark, normalize(job)] })));
+    console.log('normalized scores: ' +
+      JSON.stringify(normalized.map(function(job) {
+        return [job.benchmark, normalize(job)];
+      })));
     normalized = normalized.map(function(job) { return normalize(job); });
-    return normalized.map(function(x) { return Math.pow(x, 1/normalized.length); }).reduce(function(x, y) { return x * y; }, 1);
+    return normalized.map(function(x) {
+      return Math.pow(x, 1/normalized.length);
+    }).reduce(function(x, y) {
+      return x * y;
+    }, 1);
   }
 
   var curr = 0;
@@ -401,31 +466,34 @@ function run() {
       var finalResult = finalCalculation();
       showFinalScore(prettyInteger(finalResult));
       if (postToURL) {
-        results = [];
-        for (i = 0; i < jobs.length; ++i) {
-          job = jobs[i];
+        results = jobs.map(function (job) {
           if ('calculate' in job) {
-            results.push({'benchmark': job.benchmark,
-                          'result': job.calculate().toFixed(3)});
+            return {
+              'benchmark': job.benchmark,
+              'result': job.calculate().toFixed(3)
+            };
           }
-        }
+        });
         results.push({'benchmark': 'score', 'result': finalResult});
 
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open('POST', postToURL, true);
-        xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xmlHttp.setRequestHeader('Content-type',
+          'application/x-www-form-urlencoded');
         xmlHttp.send('results=' + JSON.stringify(results));
       }
       return;
     }
+
     if (job.title) {
-      tableBodyLines[curr-1] = '<tr>' +
-                               '  <td style="background-color:#ddd"><b>' + job.title + '</b></td>' +
-                               '  <td style="background-color:#ddd"></td>' +
-                               '  <td style="background-color:#ddd"></td>' +
-                               '  <td style="background-color:#ddd">' + (job.description ? job.description + ' (<a onclick="ensureFAQ()" href="#explanations">details</a>)' : '') + '</td>' +
-                               //'  <td style="background-color:#ddd"></td>' +
-                               '</tr>';
+      tableBodyLines[curr-1] = (
+        '<tr class="row-group row-active" title="' + job.title + '">\n' +
+        '  <td class="cell-group-title">' + job.title + '</td>\n' +
+        '  <td colspan="2"></td>\n' +
+        '  <td class="cell-description">' + job.description + '</td>\n' +
+        //'  <td></td>\n' +
+        '</tr>\n'
+      );
       flushTable();
       setTimeout(runJob, 1);
       return;
@@ -433,19 +501,21 @@ function run() {
 
     jobMap[job.benchmark] = job;
 
-    function emitBenchmarkLine(result, style) {
-      tableBodyLines[curr-1] = '<tr>' +
-                               '  <td>' + job.benchmark + '</td>' +
-                               '  <td style="' + style + '"><div class="text-center">' + result + '</div></td>' +
-                               '  <td>' + job.scale + '</td>' +
-                               '  <td>' + (job.description || '') + '</td>' +
-                               //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>' +
-                               '</tr>';
+    function emitBenchmarkLine(result, classes) {
+      tableBodyLines[curr-1] = (
+        '<tr>\n' +
+        '  <td>' + job.benchmark + '</td>\n' +
+        '  <td class="' + classes + '">' + (result || '&nbsp;') + '</td>\n' +
+        '  <td class="cell-scale">' + job.scale + '</td>\n' +
+        '  <td class="cell-description">' + (job.description || '') + '</td>\n' +
+        //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>\n' +
+        '</tr>'
+      );
     }
-    emitBenchmarkLine('<b>running&hellip;</b>', 'background-color: #fda');
+    emitBenchmarkLine('running&hellip;', 'cell-running');
     flushTable();
 
-    // Run the job the specified number of times
+    // Run the job the specified number of times.
     var reps = 0;
     var totalReps = job.totalReps || 2;
     var warmupReps = job.warmupReps || 0;
@@ -453,6 +523,7 @@ function run() {
 
     function finish() {
       console.log('final: ' + JSON.stringify(results));
+
       var final = {}, i, k, sum = 0, squares = 0;
       for (i = warmupReps; i < totalReps; i++) {
         var result = results[i];
@@ -465,9 +536,10 @@ function run() {
         var curr = job.calculate();
         job.msg = null;
         sum += curr;
-        squares += curr*curr;
+        squares += curr * curr;
       }
-      // check for excessive variability
+
+      // Check for excessive variability.
       var n = totalReps - warmupReps;
       var mean = sum/n;
       var mean2 = squares/n;
@@ -475,7 +547,7 @@ function run() {
       var noise = Math.abs(std/mean)/Math.sqrt(n);
       var tooVariable = noise > 0.2;
 
-      // calculate final score
+      // Calculate final score.
       for (k in final) {
         if (typeof final[k] === 'number') {
           final[k] /= totalReps - warmupReps;
@@ -484,11 +556,12 @@ function run() {
       job.msg = final;
       console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
-      emitBenchmarkLine('<b>' + job.calculate().toFixed(3) + (tooVariable ? ' <a onclick="ensureFAQ()" href="#toovariable">(±' + Math.round(100*noise) + '%!)</a>' : '') + '</b>', 'background-color: #bbccff');
+      emitBenchmarkLine(job.calculate().toFixed(3) + (tooVariable ? ' <a href="#faq-toovariable">(±' + Math.round(100*noise) + '%!)</a>' : ''),
+        'cell-number');
       flushTable();
-      //document.getElementById(job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
-      //document.getElementById(job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
-      setTimeout(function() {
+      //$('#' + job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
+      //$('#' + job.benchmark + '-normalized-cell').style = 'background-color: #ee9955';
+      setTimeout(function () {
         runJob();
       }, 1);
     }
@@ -522,24 +595,22 @@ function run() {
   runJob();
 }
 
-// serialization
+// Serialization
 
 function copyData() {
-  function fixUp(text) {
-    return text.replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/'/g, '&#39;')
-      .replace(/"/g, '&#34;');
-  }
-  document.getElementById('copy_results').innerHTML = '<hr><h3>Copy this:</h3><code><pre>' + fixUp(finalScore + '|' + tableBody.innerHTML) + '</pre></code><hr>';
+  copyResults.innerHTML = (
+    '<hr><h3>Copy this:</h3><code><pre>' +
+    escape_(finalScore + '|' + tableBody.innerHTML) +
+    '</pre></code><hr>'
+  );
 }
 
 function pasteData() {
-  var data = prompt('Paste the old results:');
+  var data = window.prompt('Paste the old results:');
   var split = data.split('|');
   showFinalScore(split[0]);
   flushTable(split[1]);
+  btnCopy.blur();
 }
 
 function _pd(func) {
@@ -549,12 +620,100 @@ function _pd(func) {
   };
 }
 
-var btnCopy = document.getElementById('btn-copy');
-var btnRun = document.getElementById('btn-run');
-var btnPaste = document.getElementById('btn-paste');
+var area = $('#presentation-area');
+var btnCopy = $('#btn-copy');
+var btnRun = $('#btn-run');
+var btnPaste = $('#btn-paste');
+var copyResults = $('#copy-results');
+var aboveResultsArea = $('#above-results-area');
+var resultsArea = $('#results-area');
 
-btnCopy.addEventListener('click', _pd(copyData), false);
-btnRun.addEventListener('click', _pd(run), false);
-btnPaste.addEventListener('click', _pd(pasteData), false);
+btnCopy.addEventListener('click', _pd(copyData));
+btnRun.addEventListener('click', _pd(run));
+btnPaste.addEventListener('click', _pd(pasteData));
 
-document.addEventListener('DOMContentLoaded', function() { if (autoRun) run(); }, false);
+if (autoRun) {
+  document.addEventListener('DOMContentLoaded', run);
+}
+
+$('.logo').addEventListener('click', function () {
+  window.location.reload();
+});
+
+// Open external links in a new tab.
+$$('[href^="//"], [href*="://"]').forEach(function (link) {
+  link.setAttribute('target', '_blank');
+});
+
+
+// Set `data` attribute for the current section so we can use as a CSS selector.
+window.addEventListener('hashchange', updateHash);
+
+function updateHash() {
+  document.body.setAttribute('data-hash', window.location.hash);
+}
+
+function replaceHash(newHash) {
+  // Do not use `window.location.hash`, since we don't want the page to jump
+  // to the top of the section when we're already in that section.
+  window.history.replaceState(null, null,
+    window.location.pathname + (newHash || ''));
+  updateHash();
+}
+
+updateHash();
+
+var sections = $$('section[id], h3[id], a[name]').map(function (el) {
+  return {
+    top: el.offsetTop,
+    id: el.name || el.id
+  };
+});
+
+function closest() {
+  var section;
+  var top = window.scrollY;
+  var i = sections.length;
+  while (i--) {
+    section = sections[i];
+    if (top >= section.top - 1) {
+      return section;
+    }
+  }
+}
+
+var debouncedScroll = new Debounce(function () {
+  var h = closest();
+  var newHash = h ? ('#' + h.id) : '';
+
+  // Update the query string in the address bar.
+  if (window.location.hash !== newHash) {
+    replaceHash(newHash);
+  }
+}, 25);
+
+window.addEventListener('scroll', function () {
+  debouncedScroll.reset();
+});
+
+
+function Debounce(func, ms) {
+  this.timeout = null;
+  this.func = func;
+  this.ms = ms;
+}
+
+Debounce.prototype.start = function () {
+  this.timeout = window.setTimeout(this.func, this.ms);
+};
+
+Debounce.prototype.reset = function () {
+  this.abort();
+  this.start();
+};
+
+Debounce.prototype.abort = function () {
+  window.clearTimeout(this.timeout);
+};
+
+})();

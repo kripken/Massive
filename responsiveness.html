@@ -5,23 +5,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Emscripten-Generated Code</title>
     <style>
-      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-      textarea.emscripten { font-family: monospace; width: 80%; }
+      * { margin: 0; padding: 0; }
+      body { font-family: monospace; padding: 10px; }
+      p { margin-bottom: 10px; }
+      textarea { font: inherit; font-size: 30pt; font-weight: bold; }
+      .emscripten { display: block; padding-right: 0; margin: 0 auto; }
+      textarea.emscripten { width: 80%; }
       div.emscripten { text-align: center; }
       div.emscripten_border { border: 1px solid black; }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; }
-      textarea {
-        font-size: 30pt;
-        font-weight: bold;
-      }
     </style>
   </head>
   <body>
     <p>An 'X' should move around, indicating responsiveness (after download, which is not counted)</p>
-    <textarea id="spinner" cols=20 maxlength=20 disabled=1>...</textarea>
+    <textarea id="spinner" cols="20" maxlength="20" disabled>...</textarea>
     <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>  
+      <progress value="0" max="100" id="progress" hidden></progress>
     </div>
     <div style="display:none">
       <div class="emscripten_border">
@@ -31,7 +31,7 @@
         <input type="checkbox" id="resize">Resize canvas
         <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
         &nbsp;&nbsp;&nbsp;
-        <input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
+        <input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked,
                                                                                   document.getElementById('resize').checked)">
       </div>
       <textarea class="emscripten" id="output" rows="8"></textarea>
