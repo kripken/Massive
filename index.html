@@ -44,10 +44,8 @@
             <thead>
               <tr>
                 <th>Benchmark</th>
-                <th>Result</th>
-                <th>Scale</th>
+                <th>Normalized Result (higher is better)</th>
                 <th>What it measures</th>
-                <!--th>Normalized score<br>(higher is better)</th-->
               </tr>
             </thead>
             <tbody id="table-body">
@@ -163,9 +161,15 @@
            very much). Note that results of individual benchmarks show up when ready, so you can view those
            before all of Massive is complete.</p>
         </div>
+
         <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-can_I_run_just_an_individual_benchmark" href="#faq-can_I_run_just_an_individual_benchmark">Can I run just an individual benchmark, for testing purposes?</a></h3>
         <div class="answer">
           <p>Sure, use a URL like <a href="index.html?box2d-throughput,box2d-throughput-f32"><code>index.html?box2d-throughput,box2d-throughput-f32</code></a> to run just those benchmarks.</p>
+        </div>
+
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-10000" href="#faq-10000">Why do some individual results show a round "10,000"?</a></h3>
+        <div class="answer">
+          <p>Some calculations have an "absolute optimal" result. For example, Variance measures how variable the frame rate is. If the frame rate is practically still - no jumping around at all - then the result is the maximum score of 10,000. For practical reasons, there is an absolute threshold: In the case of Variance, anything under 5ms is considered perfect; this avoids large differences between results like 2ms and 4ms (double the variance in the second!), because 5ms is already so small as to be below the threshold of noticeability.</p>
         </div>
       </div>
     </section>
@@ -192,7 +196,7 @@
     </section>
     <footer id="footer" class="footer">
       <div class="wrap wrap-juicy">
-        <p>v1.0</p>
+        <p>v1.1</p>
       </div>
     </footer>
     <script src="driver.js"></script>

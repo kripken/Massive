@@ -342,7 +342,7 @@ var tableBodyLines = jobs.map(function (job) {
     return (
       '<tr class="row-pending row-group" title="' + job.title + '">\n' +
       '  <td class="cell-group-title">' + job.title + '</td>\n' +
-      '  <td colspan="2"></td>\n' +
+      '  <td></td>\n' +
       '  <td class="cell-description">' + job.description + '</td>\n' +
       '</tr>\n'
     );
@@ -351,7 +351,6 @@ var tableBodyLines = jobs.map(function (job) {
       '<tr class="row-pending row-test">\n' +
       '  <td title="' + job.benchmark + '">' + job.benchmark + '</td>\n' +
       '  <td></td>\n' +
-      '  <td class="cell-scale">' + job.scale + '</td>\n' +
       '  <td class="cell-description">' + job.description + '</td>\n' +
       '</tr>\n'
     );
@@ -489,7 +488,7 @@ function run() {
       tableBodyLines[curr-1] = (
         '<tr class="row-group row-active" title="' + job.title + '">\n' +
         '  <td class="cell-group-title">' + job.title + '</td>\n' +
-        '  <td colspan="2"></td>\n' +
+        '  <td></td>\n' +
         '  <td class="cell-description">' + job.description + '</td>\n' +
         //'  <td></td>\n' +
         '</tr>\n'
@@ -506,7 +505,6 @@ function run() {
         '<tr>\n' +
         '  <td>' + job.benchmark + '</td>\n' +
         '  <td class="' + classes + '">' + (result || '&nbsp;') + '</td>\n' +
-        '  <td class="cell-scale">' + job.scale + '</td>\n' +
         '  <td class="cell-description">' + (job.description || '') + '</td>\n' +
         //'  <td id="' + job.benchmark + '-normalized-cell"><div id="' + job.benchmark + '-normalized-output" class="text-center"></div></td>\n' +
         '</tr>'
@@ -556,7 +554,7 @@ function run() {
       job.msg = final;
       console.log('final: ' + JSON.stringify(job.msg) + ' on ' + (totalReps - warmupReps));
 
-      emitBenchmarkLine(job.calculate().toFixed(3) + (tooVariable ? ' <a href="#faq-toovariable">(±' + Math.round(100*noise) + '%!)</a>' : ''),
+      emitBenchmarkLine(prettyInteger(normalize(job)) + (tooVariable ? ' <a href="#faq-toovariable">(±' + Math.round(100*noise) + '%!)</a>' : ''),
         'cell-number');
       flushTable();
       //$('#' + job.benchmark + '-normalized-output').innerHTML = '<b>' + prettyInteger(normalize(job)) + '</b>';
