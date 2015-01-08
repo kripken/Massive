@@ -473,6 +473,12 @@ function run() {
             };
           }
         });
+
+        // We need to remove the 'undefined' elements
+        results = results.filter(function(res) {
+          return res != null
+        });
+
         results.push({'benchmark': 'score', 'result': finalResult});
 
         var xmlHttp = new XMLHttpRequest();
