@@ -6924,11 +6924,7 @@ function copyTempDouble(ptr) {
 
   var _FtoILow=true;
 
-  function __ZTISt9exception() {
-  Module['printErr']('missing function: _ZTISt9exception'); abort(-1);
-  }
-
-
+  var __ZTISt9exception = 0;
 
 
 
