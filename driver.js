@@ -469,7 +469,7 @@ function run() {
           if ('calculate' in job) {
             return {
               'benchmark': job.benchmark,
-              'result': job.calculate().toFixed(3)
+              'result': normalize(job)
             };
           }
         });
