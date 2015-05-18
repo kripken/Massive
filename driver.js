@@ -175,7 +175,7 @@ var jobs = [
       return this.calculate()/10;
     },
   },
-  // poppler. build instructions: run asm3.test_poppler in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true
+  // poppler. build instructions: run asm3.test_poppler in emscripten test suite but without memory init file and in -g2, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler-throughput',
     description: 'Poppler PDF rendering performance',
@@ -192,7 +192,7 @@ var jobs = [
       return (7/this.calculate());
     },
   },
-  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60000000 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1
+  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60000000 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1 --memory-init-file 0
   {
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',

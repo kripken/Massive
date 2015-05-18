@@ -31,6 +31,7 @@ onmessage = function(event) {
     xhr.open('GET', source, false);
     xhr.send(null);
     var src = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
+    src = src.replace("'use asm';'", "'use asm';" + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
     if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
     var start = Date.now();
     var out = eval(src);

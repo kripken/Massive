@@ -19,6 +19,7 @@ onmessage = function(event) {
   if (!msg.args || msg.args.indexOf('warm') < 0) {
     console.log('cold');
     src = src.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
+    src = src.replace("'use asm';", "'use asm';" + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
     if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
   }
 

@@ -17,7 +17,7 @@ startup = Date.now() - startup;
 
 function doIt(code) {
   var start = Date.now();
-  Lua.execute(code);
+  L.execute(code);
   print(['runtime:', Date.now() - start, '  startup:', startup]);
 }
 

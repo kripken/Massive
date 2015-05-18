@@ -150,6 +150,7 @@
           xhr.open('GET', url, false);
           xhr.send(null);
           var code = xhr.responseText.replace('"use asm";', '"use asm";' + 'var RANDOM_DOGE=' + Math.random() + ';'); // randomize to avoid caching
+          code = code.replace("'use asm';", "'use asm';" + 'var RANDOM_DOGE=' + Math.random() + ';'); // randomize to avoid caching
           if (code === xhr.responseText) throw 'failed to modify code' + typeof xhr.responseText;
           var blob = new Blob([code]);
           var src = URL.createObjectURL(blob);
