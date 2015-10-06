@@ -38,6 +38,7 @@ function normalize(job) {
 var SECONDS = 'seconds <small>(lower is better)</small>';
 var MILLISECONDS = 'milliseconds <small>(lower is better)</small>';
 var MFLOPS = 'MFLOPS <small>(<b>higher</b> is better)</small>';
+var MBYTES = 'MB of RAM <small>(<b>higher</b> is better)</small>';
 
 function makeMainThreadBenchmark(name, args, before, after) {
   return {
@@ -95,6 +96,26 @@ var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
 var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
 
 var jobs = [
+  { title: 'Large compilation', description: 'Tests how big a codebase the browser can compile' },
+
+  {
+    benchmark: 'large-compilation',
+    description: 'How big a codebase can be compiled',
+    scale: MBYTES,
+    args: [],
+    totalReps: 1,
+    createWorker: function() {
+      return new Worker('largeCompilation/test.js');
+    },
+    calculate: function() {
+      return this.msg.mb;
+    },
+    normalized: function() {
+      return this.calculate();
+    },
+  },
+  { waka: 'waka' },
+
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
