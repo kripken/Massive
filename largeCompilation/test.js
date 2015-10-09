@@ -1,9 +1,6 @@
 
-var CHUNK = 25*1024*1024;
-
-var SILLY = 'x = x + 1 | 0; x = x - 1 | 0; ';
-
 function makeModule(target) {
+  var SILLY = 'x = x + 1 | 0; x = x - 1 | 0; ';
   var silly = SILLY;
   while (silly.length < target/1000) silly = silly + silly;
   var parts = ['function module_' + target + '(stdlib, foreign, heap) { "use asm"; var g_i = 0;'];
@@ -25,96 +22,59 @@ function makeModule(target) {
 }
 
 function finish(mb) {
+  console.log('finishing with ' + mb);
   postMessage({
     benchmark: 'large-compilation',
     mb: mb,
   });
 }
 
-function measureFreeMemory() {
-  var size = 1024*1024;
+function tryAllocations() {
+  var CHUNK = 50*1024*1024;
+  var size = CHUNK;
+  var curr, last;
   while (1) {
+    last = curr;
     try {
+      console.log('try ' + size);
       curr = new Uint8Array(size);
+      console.log('    ok');
       curr[Math.random()*curr.length | 0] = 1;
     } catch(e) {
-      return size/2 + (curr ? curr[Math.random()*curr.length | 0] : 0);
+      return last;
     }
-    curr = null;
-    size = size*2;
+    size += CHUNK;
   }
-/*
-  var pieces = [];
-  function finish() {
-    return size * pieces.length + pieces[Math.random()*pieces.length | 0][Math.random()*size | 0];
-  }
-  while (1) {
-    try {
-      var piece = new Uint8Array(size);
-      if (!piece) return finish();
-      pieces.push(piece);
-      piece[Math.random()*size | 0] = 1;
-      console.log('pieces: ' + [pieces.length, pieces[pieces.length-1].length]);
-    } catch(e) {
-      return finish();
-    }
-  }
-  return finish();
-*/
+  console.log('stop tryAllocations due to limit');
+  return curr;
 }
 
-function grabMemory(amount) {
-  var chunk = 200*1024*1024;
-  var ret = [];
-  var total = 0;
-  while (amount > 0) {
-    var curr = new Uint8Array(Math.min(chunk, amount));
-    curr[Math.random()*curr.length | 0] = 1;
-    ret.push(curr);
-    amount -= chunk;
-    total += curr.length;
-  }
-  console.log('grabbed ' + [ret.length, total]);
-  return ret;
-}
-
-function test(size) {
+function test() {
+  var size = 5*1024*1024;
   var code = makeModule(size);
   var blob = new Blob([code], { type: 'text/javascript' });
   var src = URL.createObjectURL(blob);
-  console.log('trying ' + (size/(1024*1024)).toFixed(2));
-  var before = measureFreeMemory();
-  var GRAB = grabMemory(before*0.75);
-  console.log('before: ' + before);
+  console.log('trying');
   try {
     importScripts(src);
   } catch(e) {
-    finish(size);
+    finish(-2);
   } finally {
     URL.revokeObjectURL(src);
   }
   console.log('imported');
-  var middle = measureFreeMemory();
-  console.log('middle: ' + middle);
-  // success, test the module
   var name = 'module_' + size;
   var linked = eval(name + '(this, {}, new ArrayBuffer(1024*1024))');
   console.log('linked');
-  var after = measureFreeMemory();
-  console.log('after: ' + after);
-  // we should verify, but it crashes chrome XXX if (linked.export(17) !== 18) finish(-1); // bad output
-  eval(name + ' = null');
-  code = blob = src = name = linked = null; // hold on to nothing
-  GRAB.length = 0;
-  GRAB = null;
-  console.log('reset');
-  setTimeout(function() {
-    test(size + CHUNK);
-  }, 1); // delaying even 1ms is enough to allow compilation memory to be reclaimed
+  if (linked.export(17) !== 18) finish(-1); // bad output
+  console.log('verified');
+  // we succeeded in building a large asm.js application, now let's see how much memory we can allocate
+  var biggest = tryAllocations();
+  finish(biggest ? biggest.length/(1024*1024) : 0);
 }
 
 onmessage = function(event) {
   var msg = event.data;
-  test(CHUNK);
+  test();
 };
 
