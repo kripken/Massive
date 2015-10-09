@@ -73,6 +73,25 @@ function test() {
   finish(biggest ? biggest.length/(1024*1024) : 0);
 }
 
+function testStandalone(size) {
+  var code = makeModule(size);
+  var blob = new Blob([code], { type: 'text/javascript' });
+  var src = URL.createObjectURL(blob);
+  console.log('trying');
+  var script = document.createElement('script');
+  script.onload = function() {
+    console.log('imported');
+    var name = 'module_' + size;
+    var linked = eval(name + '(this, {}, new ArrayBuffer(1024*1024))');
+    console.log('linked');
+    if (linked.export(17) !== 18) finish(-1); // bad output
+    console.log('verified');
+    URL.revokeObjectURL(src);
+  }
+  script.src = src;
+  document.body.appendChild(script);
+}
+
 onmessage = function(event) {
   var msg = event.data;
   test();
