@@ -96,6 +96,7 @@ var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
 var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
 
 var jobs = [
+/*
   { title: 'Large compilation', description: 'Tests how big a codebase the browser can compile' },
 
   {
@@ -115,6 +116,7 @@ var jobs = [
     },
   },
   { waka: 'waka' },
+*/
 
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
