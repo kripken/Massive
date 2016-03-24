@@ -1,8 +1,8 @@
 function integrateWasmJS(Module) {
  var method = Module["wasmJSMethod"] || Module["wasmJSMethod"] || "native-wasm" || "native-wasm,interpret-s-expr";
- var wasmTextFile = Module["wasmTextFile"] || "box2d.wasm";
- var wasmBinaryFile = Module["wasmBinaryFile"] || "box2d.wasm";
- var asmjsCodeFile = Module["asmjsCodeFile"] || "box2d.asm.js";
+ var wasmTextFile = Module["wasmTextFile"] || "f32_box2d.wasm";
+ var wasmBinaryFile = Module["wasmBinaryFile"] || "f32_box2d.wasm";
+ var asmjsCodeFile = Module["asmjsCodeFile"] || "f32_box2d.asm.js";
  var asm2wasmImports = {
   "f64-rem": (function(x, y) {
    return x % y;
@@ -1192,6 +1192,10 @@ if (!Math["imul"] || Math["imul"](4294967295, 5) !== -5) Math["imul"] = function
  return al * bl + (ah * bl + al * bh << 16) | 0;
 };
 Math.imul = Math["imul"];
+if (!Math["fround"]) Math["fround"] = (function(x) {
+ return x;
+});
+Math.fround = Math["fround"];
 if (!Math["clz32"]) Math["clz32"] = (function(x) {
  x = x >>> 0;
  for (var i = 0; i < 32; i++) {
@@ -2430,9 +2434,9 @@ function invoke_v(index) {
   asm["setThrew"](1, 0);
  }
 }
-function invoke_viid(index, a1, a2, a3) {
+function invoke_viif(index, a1, a2, a3) {
  try {
-  Module["dynCall_viid"](index, a1, a2, a3);
+  Module["dynCall_viif"](index, a1, a2, a3);
  } catch (e) {
   if (typeof e !== "number" && e !== "longjmp") throw e;
   asm["setThrew"](1, 0);
@@ -2493,7 +2497,7 @@ Module.asmLibraryArg = {
  "invoke_ii": invoke_ii,
  "invoke_viii": invoke_viii,
  "invoke_v": invoke_v,
- "invoke_viid": invoke_viid,
+ "invoke_viif": invoke_viif,
  "invoke_viiiiii": invoke_viiiiii,
  "invoke_iii": invoke_iii,
  "invoke_iiiiii": invoke_iiiiii,
@@ -2557,7 +2561,7 @@ var dynCall_vii = Module["dynCall_vii"] = asm["dynCall_vii"];
 var dynCall_ii = Module["dynCall_ii"] = asm["dynCall_ii"];
 var dynCall_viii = Module["dynCall_viii"] = asm["dynCall_viii"];
 var dynCall_v = Module["dynCall_v"] = asm["dynCall_v"];
-var dynCall_viid = Module["dynCall_viid"] = asm["dynCall_viid"];
+var dynCall_viif = Module["dynCall_viif"] = asm["dynCall_viif"];
 var dynCall_viiiiii = Module["dynCall_viiiiii"] = asm["dynCall_viiiiii"];
 var dynCall_iii = Module["dynCall_iii"] = asm["dynCall_iii"];
 var dynCall_iiiiii = Module["dynCall_iiiiii"] = asm["dynCall_iiiiii"];

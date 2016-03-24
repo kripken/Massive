@@ -23,14 +23,22 @@ onmessage = function(event) {
     });
   }
 
-  var source = msg.benchmark.indexOf('f32') < 0 ? 'box2d.js' : 'box2d_f32_2.js';
+  var source = msg.benchmark.indexOf('f32') < 0 ? 'box2d.js' : 'f32_box2d.js';
+  var asmjs = source.replace('.js', '.asm.js')
+
+  Module.wasmJSMethod = 'asmjs';
 
   if (msg.args === 'cold') {
     Module.arguments = ['0'];
     var xhr = new XMLHttpRequest();
     xhr.open('GET', source, false);
     xhr.send(null);
-    var src = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
+    var src = xhr.responseText;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', asmjs, false);
+    xhr.send(null);
+    var src = xhr.responseText + '\n' + src; // asm.js and then the rest of the code
+    src = src.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
     src = src.replace("'use asm';'", "'use asm';" + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
     if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
     var start = Date.now();
@@ -43,6 +51,7 @@ onmessage = function(event) {
   Module.arguments = msg.args;
 
   var start = Date.now();
+  importScripts(asmjs);
   importScripts(source);
   var time = Date.now() - start;
 
