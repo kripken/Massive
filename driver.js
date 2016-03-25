@@ -95,6 +95,7 @@ var POPPLER_DATA = { url: 'poppler/freeculture.pdf', filename: 'input.pdf' };
 var POPPLER_ARGS = ['-scale-to', '512', 'input.pdf', '-f', '1', '-l', '5'];
 
 var jobs = [
+  /* XXX wasm doesn't have async loading yet, so we can't test this
   { title: 'Main thread responsiveness', description: 'Tests user-noticeable stalls as a large codebase is loaded' },
 
   // test of latency/smoothness on main thread as a large codebase loads and starts to run
@@ -107,6 +108,7 @@ var jobs = [
                           totalReps: 8, warmupReps: 0 }),
   makeMainThreadBenchmark('sqlite-warm', { cold: false, url: 'sqlite/sqlite.js', prints: 12, arguments: ['--size', '0'], description: 'SQLite operations',
                           totalReps: 9, warmupReps: 1 }, null, togglePresentationArea),
+  */
 
   { title: 'Throughput', description: 'Tests performance in long-running computational code' },
 
@@ -127,10 +129,41 @@ var jobs = [
       return (10/this.calculate());
     },
   },
+  {
+    benchmark: 'box2d-wasm-throughput',
+    description: 'Box2D physics performance (WebAssembly)',
+    scale: MILLISECONDS,
+    args: ['3'],
+    totalReps: 4, // more reps to stabilize variance, which is more variable
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js');
+    },
+    calculate: function() {
+      return this.msg.average;
+    },
+    normalized: function() {
+      return (10/this.calculate());
+    },
+  },
   // box2d float32. build instructions: let emscripten benchmark suite generate it for you, with PRECISE_F32=2
   {
     benchmark: 'box2d-throughput-f32',
-    description: 'Box2D physics performance w/ Math.fround',
+    description: 'Box2D physics performance w/ float opts',
+    scale: MILLISECONDS,
+    args: ['3'],
+    createWorker: function() {
+      return new Worker('box2d/benchmark-worker.js');
+    },
+    calculate: function() {
+      return this.msg.average;
+    },
+    normalized: function() {
+      return (10/this.calculate());
+    },
+  },
+  {
+    benchmark: 'box2d-wasm-throughput-f32',
+    description: 'Box2D physics performance w/ float opts (WebAssembly)',
     scale: MILLISECONDS,
     args: ['3'],
     createWorker: function() {
