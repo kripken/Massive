@@ -209,10 +209,26 @@ var jobs = [
     },
   },
 
-  // poppler. build instructions: run asm3.test_poppler in emscripten test suite but without memory init file and in -g2, then remove last 3 lines in source file that were appended, change shouldRunNow to true
+  // poppler. build instructions: run asm3.test_poppler in emscripten test suite, then remove last 3 lines in source file that were appended, change shouldRunNow to true a few lines above that
   {
     benchmark: 'poppler-throughput',
     description: 'Poppler PDF rendering performance',
+    scale: SECONDS,
+    args: [],
+    totalReps: 4, // more reps to stabilize variance, which is more variable
+    createWorker: function() {
+      return new Worker('poppler/benchmark-worker.js');
+    },
+    calculate: function() {
+      return Math.max(1/30, this.msg.runtime/1000);
+    },
+    normalized: function() {
+      return (7/this.calculate());
+    },
+  },
+  {
+    benchmark: 'poppler-wasm-throughput',
+    description: 'Poppler PDF rendering performance (WebAssembly)',
     scale: SECONDS,
     args: [],
     totalReps: 4, // more reps to stabilize variance, which is more variable
@@ -246,8 +262,8 @@ var jobs = [
   { title: 'Preparation', description: 'Tests how fast a casebase is loaded and ready to run' },
 
   {
-    benchmark: 'poppler-cold-preparation',
-    description: 'how long a cold preparation takes Poppler',
+    benchmark: 'poppler-preparation',
+    description: 'how long preparation takes Poppler',
     scale: SECONDS,
     args: ['startup'],
     totalReps: 4,
@@ -262,45 +278,11 @@ var jobs = [
     },
   },
   {
-    benchmark: 'poppler-warm-preparation',
-    description: 'how long a warm preparation takes Poppler',
-    scale: SECONDS,
-    args: ['startup', 'warm'],
-    totalReps: 5,
-    warmupReps: 1,
-    createWorker: function() {
-      return new Worker('poppler/benchmark-worker.js');
-    },
-    calculate: function() {
-      return this.msg.startup/1000;
-    },
-    normalized: function() {
-      return (1/30)/Math.max(this.calculate(), 1/30);
-    },
-  },
-  {
     benchmark: 'sqlite-cold-preparation',
-    description: 'how long a cold preparation takes SQLite',
+    description: 'how long preparation takes SQLite',
     scale: SECONDS,
-    args: ['startup', 'cold'],
+    args: ['startup'],
     totalReps: 6,
-    createWorker: function() {
-      return new Worker('sqlite/benchmark-worker.js');
-    },
-    calculate: function() {
-      return this.msg.runtime/1000;
-    },
-    normalized: function() {
-      return (1/30)/Math.max(this.calculate(), 1/30); // resolution: 1 frame
-    },
-  },
-  {
-    benchmark: 'sqlite-warm-preparation',
-    description: 'how long a warm preparation takes SQLite',
-    scale: SECONDS,
-    args: ['startup', 'warm'],
-    totalReps: 7,
-    warmupReps: 1,
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js');
     },

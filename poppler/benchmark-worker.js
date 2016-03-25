@@ -1,27 +1,18 @@
 
 if (typeof console === 'undefined') console = { log: function(){} };
 
+var Module = {
+  printBuffer: '',
+  arguments: ['-scale-to', '512', 'input.pdf']
+};
+
 onmessage = function(event) {
   var msg = event.data;
 
-  var Module = {
-    printBuffer: '',
-    arguments: ['-scale-to', '512', 'input.pdf']
-  };
+  var source = 'src.cpp.o.js';
 
-  // fetch source code
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'poppler.js', false);
-  xhr.send(null);
-
-  var src = xhr.responseText;
-
-  if (!msg.args || msg.args.indexOf('warm') < 0) {
-    console.log('cold');
-    src = src.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
-    src = src.replace("'use asm';", "'use asm';" + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
-    if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
-  }
+  Module.wasmJSMethod = msg.benchmark.indexOf('wasm') < 0 ? 'asmjs' : 'native-wasm';
+  console.log('using ' + Module.wasmJSMethod);
 
   if (msg.args && msg.args.indexOf('startup') >= 0) {
     Module.noInitialRun = true;
@@ -76,7 +67,16 @@ onmessage = function(event) {
   }
 
   var startup = Date.now();
-  eval(src);
+  if (Module.wasmJSMethod === 'asmjs') {
+    importScripts(source.replace('.js', '.asm.js'));
+  } else {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', source.replace('.js', '.wasm'), false);
+    xhr.responseType = 'arraybuffer';
+    xhr.send(null);
+    Module.wasmBinary = xhr.response;
+  }
+  importScripts(source);
   startup = Date.now() - startup;
 
   if (msg.args && msg.args.indexOf('startup') >= 0) {
