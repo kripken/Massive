@@ -336,6 +336,28 @@ var jobs = [
     },
   },
   {
+    benchmark: 'box2d-wasm-variance',
+    description: 'Box2D physics: frame variance (WebAssembly)',
+    scale: MILLISECONDS,
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          this.onmessage({ data: {
+            benchmark: 'box2d-wasm-variance'
+          }});
+        },
+        terminate: function(){},
+      };
+    },
+    calculate: function() {
+      var parsed = jobMap['box2d-wasm-throughput'].msg;
+      return (2*parsed.variance + (parsed.highest - parsed.average))/3;
+    },
+    normalized: function() {
+      return 5/Math.max(5, this.calculate()); // less than 5ms is perfect
+    },
+  },
+  {
     benchmark: 'poppler-variance',
     description: 'Poppler PDF performance: frame variance',
     scale: MILLISECONDS,
