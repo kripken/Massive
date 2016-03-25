@@ -24,9 +24,10 @@ onmessage = function(event) {
   }
 
   var source = msg.benchmark.indexOf('f32') < 0 ? 'box2d.js' : 'f32_box2d.js';
-  var asmjs = source.replace('.js', '.asm.js')
+  var asmjs = source.replace('.js', '.asm.js');
 
-  Module.wasmJSMethod = 'asmjs';
+  Module.wasmJSMethod = msg.benchmark.indexOf('wasm') < 0 ? 'asmjs' : 'native-wasm';
+  console.log('using ' + Module.wasmJSMethod);
 
   if (msg.args === 'cold') {
     Module.arguments = ['0'];
@@ -51,7 +52,15 @@ onmessage = function(event) {
   Module.arguments = msg.args;
 
   var start = Date.now();
-  importScripts(asmjs);
+  if (Module.wasmJSMethod === 'asmjs') {
+    importScripts(asmjs);
+  } else {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', source.replace('.js', '.wasm'), false);
+    xhr.responseType = 'arraybuffer';
+    xhr.send(null);
+    Module.wasmBinary = xhr.response;
+  }
   importScripts(source);
   var time = Date.now() - start;
 
