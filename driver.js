@@ -177,7 +177,7 @@ var jobs = [
     },
   },
 
-  // lua. build instructions: use lua.vm.js project build system
+  // lua. build instructions: use emscripten benchmark suite
   {
     benchmark: 'lua-binarytrees',
     description: 'GC performance in compiled Lua VM',
@@ -194,20 +194,21 @@ var jobs = [
     },
   },
   {
-    benchmark: 'lua-scimark',
-    description: 'numeric computation performance in compiled Lua VM',
-    scale: MFLOPS,
-    args: ['scimark.lua'],
+    benchmark: 'lua-binarytrees-wasm',
+    description: 'GC performance in compiled Lua VM (WebAssembly)',
+    scale: SECONDS,
+    args: ['binarytrees.lua'],
     createWorker: function() {
       return new Worker('lua/benchmark-worker.js');
     },
     calculate: function() {
-      return this.msg.scimarkTime;
+      return Math.max(1/30, this.msg.runtime/1000);
     },
     normalized: function() {
-      return this.calculate()/10;
+      return (7/this.calculate());
     },
   },
+
   // poppler. build instructions: run asm3.test_poppler in emscripten test suite but without memory init file and in -g2, then remove last 3 lines in source file that were appended, change shouldRunNow to true
   {
     benchmark: 'poppler-throughput',
