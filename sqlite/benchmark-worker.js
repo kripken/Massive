@@ -9,6 +9,11 @@ if (typeof console === 'undefined') console = { log: function(){} };
 onmessage = function(event) {
   var msg = event.data;
 
+  var source = 'sqlite.js';
+
+  Module.wasmJSMethod = msg.benchmark.indexOf('wasm') < 0 ? 'asmjs' : 'native-wasm';
+  console.log('using ' + Module.wasmJSMethod);
+
   function calcTime() {
     var m = /TOTAL[\. ]+([\d\.]+)s/.exec(Module.printBuffer) || [];
     m = m.map(parseFloat);
@@ -22,30 +27,19 @@ onmessage = function(event) {
     Module.arguments = msg.args;
   }
 
-  if (msg.args.indexOf('cold') >= 0) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'sqlite.js', false);
-    xhr.send(null);
-    var src = xhr.responseText.replace('"use asm";', '"use asm";' + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
-    src = src.replace("'use asm';'", "'use asm';" + '/*' + [0,0,0,0,0,0,0,0,0,0,0,0,0].map(Math.random) + '*/'); // randomize to avoid caching
-    if (src === xhr.responseText) throw 'failed to modify src' + typeof xhr.responseText;
-    var start = Date.now();
-    console.log('run sqlite with ' + Module.arguments);
-    var out = eval('var Module = { arguments: ' + JSON.stringify(Module.arguments) + ' };\n' + src);
-    var time = Date.now() - start;
-
-    postMessage({
-      benchmark: msg.benchmark,
-      runtime: time,
-      calcTime: calcTime()
-    });
-    return;
-  }
-
   console.log('run sqlite with ' + Module.arguments);
 
   var start = Date.now();
-  importScripts('sqlite.js');
+  if (Module.wasmJSMethod === 'asmjs') {
+    importScripts(source.replace('.js', '.asm.js'));
+  } else {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', source.replace('.js', '.wasm'), false);
+    xhr.responseType = 'arraybuffer';
+    xhr.send(null);
+    Module.wasmBinary = xhr.response;
+  }
+  importScripts(source);
   var time = Date.now() - start;
 
   postMessage({

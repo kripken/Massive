@@ -242,10 +242,25 @@ var jobs = [
       return (7/this.calculate());
     },
   },
-  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60000000 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1 --memory-init-file 0
+  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60030976 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1 --memory-init-file 0
   {
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
+    scale: SECONDS,
+    args: ['--size', '19'],
+    createWorker: function() {
+      return new Worker('sqlite/benchmark-worker.js');
+    },
+    calculate: function() {
+      return this.msg.calcTime;
+    },
+    normalized: function() {
+      return 8.0/this.calculate();
+    },
+  },
+  {
+    benchmark: 'sqlite-wasm-throughput',
+    description: 'sqlite operations performance (create, inserts, selects) (WebAssembly)',
     scale: SECONDS,
     args: ['--size', '19'],
     createWorker: function() {
