@@ -242,7 +242,7 @@ var jobs = [
       return (7/this.calculate());
     },
   },
-  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=60030976 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1 --memory-init-file 0
+  // sqlite. build instructions: run in emscripten: emcc -O3 tests/sqlite/sqlite3.c tests/sqlite/speedtest1.c -Itests/sqlite3/ -s TOTAL_MEMORY=67108864 -s OUTLINING_LIMIT=60000 -s MEMFS_APPEND_TO_TYPED_ARRAYS=1 --memory-init-file 0
   {
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
@@ -293,8 +293,40 @@ var jobs = [
     },
   },
   {
-    benchmark: 'sqlite-cold-preparation',
+    benchmark: 'poppler-wasm-preparation',
+    description: 'how long preparation takes Poppler (WebAssembly)',
+    scale: SECONDS,
+    args: ['startup'],
+    totalReps: 4,
+    createWorker: function() {
+      return new Worker('poppler/benchmark-worker.js');
+    },
+    calculate: function() {
+      return this.msg.startup/1000;
+    },
+    normalized: function() {
+      return (1/30)/Math.max(this.calculate(), 1/30);
+    },
+  },
+  {
+    benchmark: 'sqlite-preparation',
     description: 'how long preparation takes SQLite',
+    scale: SECONDS,
+    args: ['startup'],
+    totalReps: 6,
+    createWorker: function() {
+      return new Worker('sqlite/benchmark-worker.js');
+    },
+    calculate: function() {
+      return this.msg.runtime/1000;
+    },
+    normalized: function() {
+      return (1/30)/Math.max(this.calculate(), 1/30); // resolution: 1 frame
+    },
+  },
+  {
+    benchmark: 'sqlite-wasm-preparation',
+    description: 'how long preparation takes SQLite (WebAssembly)',
     scale: SECONDS,
     args: ['startup'],
     totalReps: 6,
@@ -371,6 +403,28 @@ var jobs = [
     },
     calculate: function() {
       var parsed = jobMap['poppler-throughput'].msg;
+      return parsed.deviation;
+    },
+    normalized: function() {
+      return 5/Math.max(5, this.calculate()); // less than 5ms is perfect
+    },
+  },
+  {
+    benchmark: 'poppler-wasm-variance',
+    description: 'Poppler PDF performance: frame variance (WebAssembly)',
+    scale: MILLISECONDS,
+    createWorker: function() {
+      return {
+        postMessage: function() {
+          this.onmessage({ data: {
+            benchmark: 'poppler-wasm-variance'
+          }});
+        },
+        terminate: function(){},
+      };
+    },
+    calculate: function() {
+      var parsed = jobMap['poppler-wasm-throughput'].msg;
       return parsed.deviation;
     },
     normalized: function() {
