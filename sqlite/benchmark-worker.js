@@ -1,6 +1,8 @@
 
 var Module = {
-  print: function(x) { Module.printBuffer += x + '\n' },
+  print: function(x) {
+    Module.printBuffer += x + '\n'
+  },
   printBuffer: ''
 };
 
@@ -17,7 +19,12 @@ onmessage = function(event) {
   function calcTime() {
     var m = /TOTAL[\. ]+([\d\.]+)s/.exec(Module.printBuffer) || [];
     m = m.map(parseFloat);
-    if (!m || !m[1]) console.log('ERROR: invalid output: ' + Module.printBuffer);
+    if (!m || !m[1]) {
+      var error = 'ERROR! invalid sqlite output ' + Module.printBuffer;
+      postMessage(error);
+      throw error;
+      return;
+    }
     return parseFloat(m[1]);
   }
 
@@ -30,6 +37,18 @@ onmessage = function(event) {
   console.log('run sqlite with ' + Module.arguments);
 
   var start = Date.now();
+
+  Module.postRun = [
+    function() {
+      var time = Date.now() - start;
+      postMessage({
+        benchmark: msg.benchmark,
+        runtime: time,
+        calcTime: calcTime()
+      });
+    }
+  ];
+
   if (Module.wasmJSMethod === 'asmjs') {
     importScripts(source.replace('.js', '.asm.js'));
   } else {
@@ -40,12 +59,5 @@ onmessage = function(event) {
     Module.wasmBinary = xhr.response;
   }
   importScripts(source);
-  var time = Date.now() - start;
-
-  postMessage({
-    benchmark: msg.benchmark,
-    runtime: time,
-    calcTime: calcTime()
-  });
 };
 
