@@ -247,7 +247,7 @@ var jobs = [
     benchmark: 'sqlite-throughput',
     description: 'sqlite operations performance (create, inserts, selects)',
     scale: SECONDS,
-    args: ['--size', '19'],
+    args: ['--size', '1'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js');
     },
@@ -262,7 +262,7 @@ var jobs = [
     benchmark: 'sqlite-wasm-throughput',
     description: 'sqlite operations performance (create, inserts, selects) (WebAssembly)',
     scale: SECONDS,
-    args: ['--size', '19'],
+    args: ['--size', '1'],
     createWorker: function() {
       return new Worker('sqlite/benchmark-worker.js');
     },
