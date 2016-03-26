@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Emscripten-Generated Code</title>
+    <style>
+      * { margin: 0; padding: 0; }
+      body { font-family: monospace; padding: 10px; }
+      p { margin-bottom: 10px; }
+      textarea { font: inherit; font-size: 30pt; font-weight: bold; }
+      .emscripten { display: block; padding-right: 0; margin: 0 auto; }
+      textarea.emscripten { width: 80%; }
+      div.emscripten { text-align: center; }
+      div.emscripten_border { border: 1px solid black; }
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten { border: 0px none; }
+    </style>
+  </head>
+  <body>
+    <p>An 'X' should move around, indicating responsiveness (after download, which is not counted)</p>
+    <textarea id="spinner" cols="20" maxlength="20" disabled>...</textarea>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden></progress>
+    </div>
+    <div style="display:none">
+      <div class="emscripten_border">
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
+      <div class="emscripten">
+        <input type="checkbox" id="resize">Resize canvas
+        <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
+        &nbsp;&nbsp;&nbsp;
+        <input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked,
+                                                                                  document.getElementById('resize').checked)">
+      </div>
+      <textarea class="emscripten" id="output" rows="8"></textarea>
+      <hr>
+    </div>
+    <script type='text/javascript'>
+      var progressElement = document.getElementById('progress');
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          var element = document.getElementById('output');
+          element.value = ''; // clear browser cache
+          return function(text) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+            // These replacements are necessary if you render to raw HTML
+            //text = text.replace(/&/g, "&amp;");
+            //text = text.replace(/</g, "&lt;");
+            //text = text.replace(/>/g, "&gt;");
+            //text = text.replace('\n', '<br>', 'g');
+            element.value += text + "\n";
+            element.scrollTop = element.scrollHeight; // focus on bottom
+          };
+        })(),
+        printErr: function(text) {
+          text = Array.prototype.slice.call(arguments).join(' ');
+          if (0) { // XXX disabled for safety typeof dump == 'function') {
+            dump(text + '\n'); // fast, straight to the real console
+          } else {
+            console.log(text);
+          }
+        },
+        canvas: document.getElementById('canvas'),
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+        }
+      };
+    </script>
+    <script>
+      var spinnerElement = document.getElementById('spinner');
+      var counter = 0;
+      var lastTime = 0, total = 0;
+
+      function noticeFrame() {
+        var now = Date.now();
+        if (lastTime) {
+          var curr = Math.max(0, now - lastTime - 1000/30); // measure positive deviations from 1/30 frame rates, minimal that looks ok
+          //console.log('noticeFrame ' + [Math.round(now - lastTime), total]);
+          total += curr;
+        }
+        lastTime = now;
+        var spin = ' ';
+        for (var i = 0; i < Math.abs(counter); i++) {
+          spin += ' ';
+        }
+        spinnerElement.value = spin + 'X';
+        counter++;
+        if (counter === 17) counter *= -1;
+      }
+
+      window.onmessage = function(event) {
+        var params = event.data;
+        var parentWindow = event.source;
+
+        Module.arguments = params.arguments;
+        var cold = params.cold;
+        var url = params.url;
+        var data = params.data;
+        var prints = params.prints;
+        var evil = params.evil;
+
+        var interval;
+        var startTime = -Infinity;
+
+        function finish() {
+          noticeFrame(); // see the last frame before we quit
+          clearInterval(interval);
+
+          if (evil) {
+            // execute code, and add that to main thread pause time
+            var start = Date.now();
+            eval(evil);
+            var diff = Date.now() - start;
+            total += diff;
+            console.log('evil eval time: ' + diff);
+          }
+
+          Module.print = function(){};
+          if (cleanup) cleanup();
+          var output = { benchmark: event.benchmark, mainThread: total, walltime: Date.now() - startTime, text: printBuffer }
+          //alert(JSON.stringify(output));
+          parentWindow.postMessage(output, event.origin);
+          if (Module.pauseMainLoop) Module.pauseMainLoop();
+        }
+
+        var oldPrint = Module.print;
+        var printBuffer = '';
+        Module.print = function(x) {
+          printBuffer += x + ' | ';
+          oldPrint(x);
+          // see when the run is over
+          if (--prints === 0) {
+            finish();
+          }
+        };
+
+        if (cold) {
+          // Load a large asm.js file asynchronously. We could just use a <script async> here, but then code caching
+          // might lead to immediate startup, without us getting a chance to check responsiveness during actual
+          // compilation. So we modify some text and use a blob url, to ensure it is something not in the cache.
+
+          // First, get the source and modify it
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', url, false);
+          xhr.send(null);
+          var code = xhr.responseText.replace('"use asm";', '"use asm";' + 'var RANDOM_DOGE=' + Math.random() + ';'); // randomize to avoid caching
+          code = code.replace("'use asm';", "'use asm';" + 'var RANDOM_DOGE=' + Math.random() + ';'); // randomize to avoid caching
+          if (code === xhr.responseText) throw 'failed to modify code' + typeof xhr.responseText;
+          var blob = new Blob([code]);
+          var src = URL.createObjectURL(blob);
+          var cleanup = function() {
+            URL.revokeObjectURL(script.src);
+          };
+        } else {
+          // warm, XXX assumes previous runs
+          src = url;
+        }
+        var script = document.createElement('script');
+
+        function runBenchmark() {
+          startTime = Date.now();
+          if (prints === 0) {
+            script.onload = function() {
+              finish();
+            };
+          }
+          script.src = src;
+          noticeFrame(); // start looking at responsiveness right now
+          interval = setInterval(noticeFrame, 1000/60);
+          document.body.appendChild(script);
+        }
+
+        if (data) {
+          // fetch data
+          xhr = new XMLHttpRequest();
+          xhr.open('GET', data.url, true);
+          xhr.responseType = 'arraybuffer';
+          xhr.onload = function () {
+            if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
+              var response = new Uint8Array(xhr.response);
+              Module.preRun = [function() {
+                FS.createDataFile('/', data.filename, response, true, false);
+              }];
+              runBenchmark();
+            } else {
+              alert('not good');
+            }
+          };
+          xhr.send(null);
+        } else {
+          runBenchmark();
+        }
+      };
+    </script>
+  </body>
+</html>
+

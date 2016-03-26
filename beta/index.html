@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>MASSIVE - the web computation benchmark</title>
+    <meta aria-hidden="true" class="section-anchor" name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta aria-hidden="true" class="section-anchor" name="description" content="">
+    <meta aria-hidden="true" class="section-anchor" name="author" content="">
+    <!-- Le styles -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet">
+  </head>
+  <body>
+    <header class="header">
+      <div class="wrap flex">
+        <a href="" class="logo flex flex-1">
+          <big class="massive flex vcentre">Massive</big>
+        </a>
+        <nav class="flex">
+          <a href="#benchmarks" class="flex vcentre">Benchmarks</a>
+          <a href="#faq" class="flex vcentre">FAQ</a>
+          <a href="#resources" class="flex vcentre">Resources</a>
+          <a href="https://github.com/kripken/Massive" class="flex vcentre">Source Code</a>
+        </nav>
+      </div>
+    </header>
+    <masthead id="intro" class="masthead-intro">
+      <div class="wrap wrap-juicy wrap-dark">
+        <big class="slogan">the <b>web computation</b> benchmark: <a href="http://asmjs.org">asm.js</a> and <a href="https://webassembly.github.io/">WebAssembly</a></big>
+      </div>
+    </masthead>
+    <section id="benchmarks" class="benchmarks">
+      <div class="wrap wrap-juicy wrap-light wrap-centre">
+        <h2>Run the benchmarks now</h2>
+        <p>Benchmarks will take a while to run, and some browsers may become less responsive for part of that time.</p>
+        <p><a class="btn btn-cta btn-run" id="btn-run">Run</a></p>
+        <p><button type="button" class="btn btn-paste" id="btn-paste">Enter data copied from another run</button></p>
+
+        <div id="above-results-area"></div>
+        <div class="hidden results-area" id="results-area">
+          <div class="toggly visible presentation-area" id="presentation-area"></div>
+          <h3>Individual Benchmark Results</h3>
+          <table class="table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Benchmark</th>
+                <th>Normalized Result (higher is better)</th>
+                <th>What it measures</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+          </table>
+          <div class="hidden" id="copy-results">
+            <button type="button" class="btn btn-copy" id="btn-copy">Copy results</button><br>
+            <small>(so you can view them again later)</small>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="faq" class="faq">
+      <div class="wrap wrap-juicy prose">
+        <h2>FAQ</h2>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-why_make_a_new_benchmark" href="#faq-why_make_a_new_benchmark">Why make a new benchmark?</a></h3>
+        <div class="answer">
+          <p>asm.js appears in one test in <a href="https://developers.google.com/octane/">Octane</a>, and in several
+           tests in <a href="http://browserbench.org/JetStream/">JetStream</a>, which is great, but several aspects of asm.js performance are
+           not fully measured in those. In particular, asm.js
+           often appears as large (you might even say <b>massive</b>) source files, which can have different performance characteristics than the typical
+           small programs appearing in most benchmarks. For example, a very large codebase may contain very large functions,
+           which due to their size are difficult to optimize efficiently (either not fully optimized, or optimized slowly in a noticeable way),
+           or just the sheer number of functions may be very high and cause the browser to pause as the codebase is parsed and starts to execute.
+           Such very large codebases can therefore bring new challenges to JavaScript engines (or rather, more extreme versions of familiar challenges),
+           and it is important to measure performance on them because they are showing up with increasing frequency on the web (for example,
+           as native plugins are fading out, game engine companies like <a href="http://unity3d.com/">Unity</a> and
+           <a href="http://unrealengine.com/">Epic</a> are starting to compile their large codebases to asm.js).
+           For these reasons, the Massive benchmark includes several very large codebases (Poppler, SQLite, etc.), and measures throughput as well as
+           responsiveness, variability and startup time (see details below).</p>
+        </div>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-how_does_this_relate_to_Emscripten" href="#faq-how_does_this_relate_to_Emscripten">How does this relate to the Emscripten benchmark suite? What does this offer over that?</a></h3>
+        <div class="answer">
+          <p>The <a href="http://kripken.github.io/embenchen/">Emscripten benchmark suite</a> evolved over time in order
+           to benchmark Emscripten itself, and therefore mainly focused on throughput, and is runnable in both shell and
+           browser. Massive, on the other hand, tests not just
+           throughput but also browser responsiveness and other factors that only make sense when running in a browser, things
+           not measured by the Emscripten benchmark suite (or by the main JavaScript benchmarks).</p>
+        </div>
+        <a aria-hidden="true" name="faq-explanations"></a>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-what_do_the_categories_mean" href="#faq-what_do_the_categories_mean">What do the categories ("Main Thread Responsiveness", "Throughput", "Preparation", and "Variance") mean?</a></h3>
+        <div class="answer">
+          <p><b>Main Thread Responsiveness</b> measures the user experience as a large codebase is loaded. What is tested is whether
+           the main thread stalls as the codebase is prepared and executed for a short while. The score here can be improved
+           by parsing the code off the main thread, for example. This does <b>not</b> measure how much time is spent,
+           but only how responsive or unresponsive the user experience is (how much time is spent is measured by
+           Preparation, and to some extent Throughput). Technically, we measure responsiveness by seeing if events on
+           the main thread execute at the proper interval (as when the main thread stalls, it stalls both the user
+           experience and other events).</p>
+          <p><b>Throughput</b> measures how fast a large computational workload runs. This is what is typically measured by
+           benchmarks. Massive's throughput tests focus on very large real-world codebases.</p>
+          <p><b>Preparation</b> measures how long (in wall time) is spent to get a codebase ready to execute, before
+           executing any of it. This measures how much
+           time passes between adding a script tag with that code and being able to call the code (this may or may not
+           cause a user-noticeable pause, depending on whether it is parsed on or off the main thread; Main Thread Responsiveness
+           tests that aspect). "Preparation" is basically all the time before code is actually able to run; that may include
+           parsing, conversion to bitcode, JIT compilation, etc., depending on the JS engine.</p>
+          <p><b>Variance</b> measures how variable the frame rate is in an application that needs to run in each frame
+           (this is important in things like games, which must finish all they need every 1/60 of a second, in order to be
+           smooth). Specifically, we run many frames and then calculate the statistical variance and worst case. Note that
+           one VM might have a much faster overall frame rate than another, but also more variance: in general, given two
+           VMs with the same average, the one with less variance is "better" since it's smoother. But given a different mean,
+           things are less clear (perhaps we are happy to get some average slowdown in order to reduce variance which can
+           cause noticable but rare pauses?). Hence we measure variance separately from throughput (which is a measurement of the total
+           speed, and is proportional to the average).</p>
+        </div>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-how_consistent_are_these_results" href="#faq-how_consistent_are_these_results">How consistent are these results between runs of the benchmark suite?</a></h3>
+        <div class="answer">
+          <p>Most of the tests, in particular the throughput ones, are generally very consistent, as we run a deterministic workload
+           in a web worker, which minimizes outside noise. We also run a few repetitions and average the results. However, in particular
+           the Main Thread Responsiveness tests need to run on the main thread, and they involve DOM events like adding a script tag,
+           setInterval, etc., which can be fairly variable. We run a larger amount of repetitions on those tests to average out the
+           noise, but even so they appear to be less consistent between runs on some browsers.</p>
+          <a aria-hidden="true" name="faq-toovariable"></a>
+          <p>When we see the results of a test are too variable, we mark it with <b>"(±X%!)"</b> next to the score. The cause of such variability
+            might be something else on your machine (perhaps a background indexing service happend to use a CPU core during a test, etc.),
+            or it might be that the browser behaves unpredictably for some reason.</p>
+        </div>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-what_code_is_being_tested" href="#faq-what_code_is_being_tested">What code is being tested in these benchmarks?</a></h3>
+        <div class="answer">
+          <p>All the benchmarks here are from real-world C or C++ codebases:</p>
+          <ul>
+            <li><b>Box2D</b>: A 2D physics engine, used in many games, for example Angry Birds. Stresses
+                              floating-point processing performance. The workload is based on
+                              <a href="https://github.com/joelgwebber/bench2d/">jgw's bench2D</a>. (~30KLOC)</li>
+            <li><b>Lua</b>: A script language that is used in many games as well as on Wikipedia. Here the
+                            entire Lua VM is compiled down to JavaScript, including interpreter, garbage
+                            collector, etc. The workloads used are the scimark and binarytrees benchmarks,
+                            which test raw computation and garbage collection, respectively. (~16KLOC)</li>
+            <li><b>Poppler</b>: A PDF rendering engine, used by many applications, for example LibreOffice.
+                                Rendering PDFs requires many capabilities (font rendering, graphics, etc.),
+                                making this the largest of the codebases tested here, especially since it is
+                                built together with the FreeType font rendering library. The workload is
+                                Lawrence Lessig's "Free Culture". (~250KLOC)</li>
+            <li><b>SQLite</b>: A complete transactional SQL database engine. Parsing and executing SQL
+                               queries is done using a large interpreter-loop type function, which is
+                               challenging to optimize. The workload is the SQLite speedtest1.c benchmark,
+                               which SQLite devs constructed to represent real-world usage patterns. (~128KLOC)</li>
+          </ul>
+          <p>All of these codebases are open source, so you can build and inspect them yourself (the build
+          tool, <a href="http://emscripten.org">Emscripten</a>, is of course open source as well).</p>
+          <p>Note that the KLOC numbers mentioned above do not include system libraries like libc and libc++,
+             the necessary parts of which are necessarily included in the benchmarks.</p>
+        </div>
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-how_long_does_Massive_take_to_run" href="#faq-how_long_does_Massive_take_to_run">How long does Massive take to run?</a></h3>
+        <div class="answer">
+          <p>Generally quite a while, as it is designed to execute fixed workloads of sufficient length to
+           measure real-world performance on large applications. How long it takes will depend on the machine and
+           browser, of course, but you can probably expect it to take at least a few minutes (on a desktop or laptop
+           machine; a mobile device may take much more). Massive should not lock up your
+           browser as it runs, however - except for the Main Thread Responsiveness tests, which run first, benchmarks
+           are run in web workers (and even the Main Thread Responsiveness tests should not reduce responsiveness
+           very much). Note that results of individual benchmarks show up when ready, so you can view those
+           before all of Massive is complete.</p>
+        </div>
+
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-can_I_run_just_an_individual_benchmark" href="#faq-can_I_run_just_an_individual_benchmark">Can I run just an individual benchmark, for testing purposes?</a></h3>
+        <div class="answer">
+          <p>Sure, use a URL like <a href="index.html?box2d-throughput,box2d-throughput-f32"><code>index.html?box2d-throughput,box2d-throughput-f32</code></a> to run just those benchmarks.</p>
+        </div>
+
+        <h3 class="section-heading"><a aria-hidden="true" class="section-anchor" name="faq-10000" href="#faq-10000">Why do some individual results show a round "10,000"?</a></h3>
+        <div class="answer">
+          <p>Some calculations have an "absolute optimal" result. For example, Variance measures how variable the frame rate is. If the frame rate is practically still - no jumping around at all - then the result is the maximum score of 10,000. For practical reasons, there is an absolute threshold: In the case of Variance, anything under 5ms is considered perfect; this avoids large differences between results like 2ms and 4ms (double the variance in the second!), because 5ms is already so small as to be below the threshold of noticeability.</p>
+        </div>
+      </div>
+    </section>
+    <section id="resources" class="resources">
+      <div class="wrap wrap-juicy prose">
+        <h2>Resources</h2>
+        <h3>Massive</a></h3>
+        <ul>
+          <li><a href="https://github.com/kripken/Massive">Source code</a></li>
+        </ul>
+
+        <h3>asm.js</a></h3>
+        <ul>
+          <li><a href="http://asmjs.org/">Spec, source code, etc.</a></li>
+        </ul>
+
+        <h3>Emscripten</a></h3>
+        <ul>
+          <li><a href="https://github.com/kripken/emscripten">Source code</a></li>
+          <li><a href="https://github.com/kripken/emscripten/wiki/Porting-Examples-and-Demos">Demos and Examples</a></li>
+          <li><a href="http://emscripten.org">Main site</a></li>
+        </ul>
+      </div>
+    </section>
+    <footer id="footer" class="footer">
+      <div class="wrap wrap-juicy">
+        <p>v2.0 (beta)</p>
+      </div>
+    </footer>
+    <script src="driver.js"></script>
+  </body>
+</html>
